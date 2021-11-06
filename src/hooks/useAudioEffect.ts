@@ -1,0 +1,182 @@
+import { Sound } from '@babylonjs/core';
+import React, { useEffect, useMemo } from 'react';
+import { useScene } from 'react-babylonjs';
+
+type NoteName = 'A' | 'A#' | 'B' | 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#'
+
+const noteNumber = {
+    'A': 0,
+    'A#': 1,
+    'B': 2,
+    'C': 3,
+    'C#': 4,
+    'D': 5,
+    'D#': 6,
+    'E': 7,
+    'F': 8,
+    'F#': 9,
+    'G': 10,
+    'G#': 11,
+} as const
+
+const getKeyByValue = <T>(object: { [key: string]: T }, value: T) => {
+    return Object.keys(object).find(key => object[key] === value);
+}
+
+const scaleProbabilities = [2, 0.5, 1, 0.5, 1, 0.6, 0.2]
+
+interface Note {
+    note: NoteName
+    octave: number
+}
+
+type NoteNumber = (typeof noteNumber)[NoteName];
+type Scale = (typeof noteNumber)[NoteName][];
+type Key = 'major' | 'minor'
+
+const constructScale = (rootNote: Note, key: Key) => {
+    const root = noteNumber[rootNote.note];
+    const scale: Scale = [];
+    if (key === 'major') {
+        scale.push(root % 12 as NoteNumber);
+        scale.push((root + 2) % 12 as NoteNumber);
+        scale.push((root + 4) % 12 as NoteNumber);
+        scale.push((root + 5) % 12 as NoteNumber);
+        scale.push((root + 7) % 12 as NoteNumber);
+        scale.push((root + 9) % 12 as NoteNumber);
+        scale.push((root + 11) % 12 as NoteNumber);
+    }
+    else {
+        scale.push(root % 12 as NoteNumber);
+        scale.push((root + 2) % 12 as NoteNumber);
+        scale.push((root + 3) % 12 as NoteNumber);
+        scale.push((root + 5) % 12 as NoteNumber);
+        scale.push((root + 7) % 12 as NoteNumber);
+        scale.push((root + 9) % 12 as NoteNumber);
+        scale.push((root + 11) % 12 as NoteNumber);
+    }
+    return scale;
+}
+
+
+
+const calcNoteFrequency = (note: Note) => {
+    const numberInOctave = noteNumber[note.note];
+    const octave = note.octave;
+    return 440 * Math.pow(2, (numberInOctave + 12 * (octave - 4)) / 12);
+}
+
+const playNote = (sound: Sound, sourceNote: Note, targetNote: Note) => {
+    const noteFrequency = calcNoteFrequency(sourceNote);
+    const targetFrequency = calcNoteFrequency(targetNote);
+    const ratio = targetFrequency / noteFrequency;
+
+    sound.setPlaybackRate(ratio);
+    sound.play();
+}
+
+const getNextNote = (scale: Scale, currentNote: Note) => {
+    const scaleIndex = scale.indexOf(noteNumber[currentNote.note]);
+
+    const possibleNextNotes: (Note & { probability: number })[] = [];
+
+    for (let i = -4; i < 5; i++) {
+        if (i === 0) continue;
+        let newScaleIndex = scaleIndex + i;
+        if (newScaleIndex < 0) {
+            newScaleIndex += scale.length;
+        }
+        else if (newScaleIndex >= scale.length) {
+            newScaleIndex -= scale.length;
+        }
+
+        const currentNoteNumber = scale[scaleIndex];
+        const nextNoteNumber = scale[newScaleIndex];
+        let newOctave = currentNote.octave;
+
+        if (i < 0 && nextNoteNumber > currentNoteNumber) {
+            newOctave--;
+        }
+        if (i > 0 && nextNoteNumber < currentNoteNumber) {
+            newOctave++;
+        }
+
+        possibleNextNotes.push({
+            note: getKeyByValue(noteNumber, scale[newScaleIndex]) as NoteName,
+            octave: newOctave,
+            probability: scaleProbabilities[newScaleIndex] / Math.abs(i / 3)
+        });
+    }
+
+    console.log(possibleNextNotes);
+
+    const totalProbability = possibleNextNotes.reduce((acc, cur) => acc + cur.probability, 0);
+    const random = Math.random() * totalProbability;
+    let currentProbability = 0;
+    for (let i = 0; i < possibleNextNotes.length; i++) {
+        const note = possibleNextNotes[i];
+        currentProbability += note.probability;
+        if (currentProbability > random) {
+            return note;
+        }
+    }
+    throw new Error("check probability code")
+}
+
+export const useAudioEffect = (numLetters: number, numWords: number) => {
+    const scene = useScene();
+    const sourceNote = useMemo(() => ({ note: 'G#' as const, octave: 5 }), []);
+    const rootNote = useMemo(() => ({ note: 'C' as const, octave: 4 }), []);
+    const scale = useMemo(() => constructScale(rootNote, 'major'), [rootNote]);
+
+    const sound = useMemo(() => {
+        if (!scene) return;
+        return new Sound("highlightSound", "/sounds/Vocal-G#5.wav", scene, null, {
+            loop: false,
+            autoplay: false,
+            volume: 0.5
+        });
+    }, [scene])
+
+    useMemo(() => {
+        if (!scene) return;
+        return new Sound("ambience", "/sounds/C-Ambience.mp3", scene, null, {
+            loop: false,
+            autoplay: true,
+            volume: 0.5
+        });
+    }, [scene])
+
+    const success = useMemo(() => {
+        if (!scene) return;
+        return [new Sound("success", "/sounds/success.mp3", scene, null, {
+            loop: false,
+            autoplay: false,
+            volume: 0.5
+        }), new Sound("success", "/sounds/success1.mp3", scene, null, {
+            loop: false,
+            autoplay: false,
+            volume: 0.5
+        })];
+    }, [scene])
+
+    const [currentNote, setCurrentNote] = React.useState<Note>(rootNote)
+
+    useEffect(() => {
+        if (success && numWords > 0)
+            success[Math.floor(Math.random() * 2)].play()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [numWords])
+
+    useEffect(() => {
+        if (!sound || numLetters === 0) return;
+
+        const nowNote = numLetters === 1 ? { note: 'C' as const, octave: Math.random() > 0.5 ? 4 : 5 } : currentNote;
+
+        playNote(sound, sourceNote, nowNote);
+
+        const nextNote = getNextNote(scale, nowNote);
+        setCurrentNote(nextNote);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [numLetters])
+}
