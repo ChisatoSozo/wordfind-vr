@@ -1,6 +1,6 @@
-import { Texture } from "@babylonjs/core"
 import { Vector3 } from "@babylonjs/core/Maths/math.vector"
-import { Control } from "@babylonjs/gui/2D/controls/control"
+import React from "react"
+import { CrosswordListWord } from "./CrosswordListWord"
 
 interface CrosswordListProps {
     words: string[]
@@ -10,15 +10,5 @@ interface CrosswordListProps {
 }
 
 export const CrosswordList: React.FC<CrosswordListProps> = ({ words, position, completedWords, crosswordDimensions }) => {
-    return <>{words.map((word, i) => <plane width={4} height={1} key={i} name={`word${position.toString()}`} position={position.add(new Vector3(4 * (Math.floor(i / crosswordDimensions.y)), -(i % crosswordDimensions.y), 0))}>
-        <advancedDynamicTexture
-            name='dialogTexture'
-            height={128} width={512}
-            createForParentMesh
-            generateMipMaps={true}
-            samplingMode={Texture.TRILINEAR_SAMPLINGMODE}
-        >
-            <textBlock textHorizontalAlignment={Control.HORIZONTAL_ALIGNMENT_LEFT} name={word} text={word} fontSize={80} fontStyle='bold' color={completedWords.includes(word.toUpperCase()) ? 'green' : 'white'} />
-        </advancedDynamicTexture>
-    </plane>)}</>
+    return <>{words.map((word, i) => <CrosswordListWord index={i} word={word} key={word} completed={completedWords.includes(word.toUpperCase())} position={position.add(new Vector3(4 * (Math.floor(i / crosswordDimensions.y)), -(i % crosswordDimensions.y), 0))} />)}</>
 }

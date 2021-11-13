@@ -1,5 +1,5 @@
-import { Texture, Vector3 } from "@babylonjs/core";
-import React, { useRef, useState } from "react";
+import { Mesh, Texture, Vector3 } from "@babylonjs/core";
+import React, { useMemo, useRef, useState } from "react";
 import { useHover } from "react-babylonjs";
 import { useMouseDown, useMouseUp } from "../forks/useMouse";
 
@@ -17,14 +17,18 @@ interface CrosswordLetterProps {
 export const CrosswordLetter: React.FC<CrosswordLetterProps> = ({ letter, index, crosswordDimensions, setCurrentHover, setFirstClicked, highlighted }) => {
     const [hovered, setHovered] = useState(false);
 
-    const planeRef = useRef(null);
+    const position = useMemo(() => new Vector3(index.x - crosswordDimensions.x / 2, -index.y + crosswordDimensions.y / 2, 0), [index, crosswordDimensions]);
+
+    const sphereRef = useRef<Mesh>(null);
+    const planeRef = useRef<Mesh>(null);
+
     useHover(
         () => {
             setHovered(true)
             setCurrentHover(index);
         },
         () => setHovered(false),
-        planeRef
+        sphereRef
     );
 
 
@@ -32,20 +36,19 @@ export const CrosswordLetter: React.FC<CrosswordLetterProps> = ({ letter, index,
         () => {
             setFirstClicked(index);
         },
-        planeRef
+        sphereRef
     );
 
     useMouseUp(
         () => {
             setFirstClicked(null);
         },
-        planeRef
+        sphereRef
     )
 
-
-    return <plane ref={planeRef} name={`plane${JSON.stringify(index)}`} position={new Vector3(index.x - crosswordDimensions.x / 2, -index.y + crosswordDimensions.y / 2, 0)}>
+    return <><plane ref={planeRef} name={`plane${JSON.stringify(index)}`} position={position}>
         <advancedDynamicTexture
-            name='dialogTexture'
+            name='letterTexture'
             height={256} width={256}
             createForParentMesh
             generateMipMaps={true}
@@ -54,4 +57,8 @@ export const CrosswordLetter: React.FC<CrosswordLetterProps> = ({ letter, index,
             <textBlock name='cancel-text' text={letter} fontSize={256} fontStyle='bold' color={highlighted ? 'green' : hovered ? 'red' : 'white'} />
         </advancedDynamicTexture>
     </plane>
+        <sphere ref={sphereRef} name={`sphere${JSON.stringify(index)}`} position={position}>
+            <standardMaterial name="alpha" alpha={0} />
+        </sphere>
+    </>
 }

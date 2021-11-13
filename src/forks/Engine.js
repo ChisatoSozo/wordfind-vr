@@ -31,7 +31,7 @@ class ReactBabylonjsEngine extends React.Component {
 
         this.engine = new Engine(
             context,
-            this.props.antialias === true ? true : false, // default false
+            true,
             { stencil: true },
             this.props.adaptToDeviceRatio === true ? true : false, // default false
         );

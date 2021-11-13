@@ -72,7 +72,7 @@ const playNote = (sound: Sound, sourceNote: Note, targetNote: Note) => {
     const ratio = targetFrequency / noteFrequency;
 
     sound.setPlaybackRate(ratio);
-    sound.play();
+    sound.play(undefined, undefined, 10 * ratio);
 }
 
 const getNextNote = (scale: Scale, currentNote: Note) => {
@@ -108,8 +108,6 @@ const getNextNote = (scale: Scale, currentNote: Note) => {
         });
     }
 
-    console.log(possibleNextNotes);
-
     const totalProbability = possibleNextNotes.reduce((acc, cur) => acc + cur.probability, 0);
     const random = Math.random() * totalProbability;
     let currentProbability = 0;
@@ -141,7 +139,7 @@ export const useAudioEffect = (numLetters: number, numWords: number) => {
     useMemo(() => {
         if (!scene) return;
         return new Sound("ambience", "/sounds/C-Ambience.mp3", scene, null, {
-            loop: false,
+            loop: true,
             autoplay: true,
             volume: 0.5
         });

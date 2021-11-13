@@ -1,3 +1,15 @@
+export const cookingWordsWithIcons = [
+    'sea',
+    'pea',
+    'pie',
+    'pancake',
+    'muffin',
+    'shrimp',
+    'bottle',
+    'pizza'
+]
+
+
 export const cookingWords = ['abiyuch',
     'acerola',
     'acorn',
