@@ -4,9 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Engine, Scene } from 'react-babylonjs';
 import { Capsules } from './components/Capsules';
 import { CrosswordAudio } from './components/CrosswordAudio';
-import { CrosswordLetter } from './components/CrosswordLetter';
+import { CrosswordLetters } from './components/CrosswordLetters';
 import { CrosswordList } from './components/CrosswordList';
-import { CrosswordParticles } from './components/CrosswordParticles';
 import { Pipeline } from './components/Pipeline';
 import { useWindowSize } from './hooks/useWindowSize';
 import { useWordSearch } from './hooks/useWordSearch';
@@ -81,23 +80,11 @@ export const App = () => {
       <Scene clearColor={new Color4(0, 0, 0, 1)}>
         <Pipeline />
         <Capsules solvedCoordinatePairs={solvedCoordinatePairs} crosswordDimensions={crosswordDimensions} />
-        <CrosswordAudio selectedLength={highlightedIndicies.length} numWords={completedWords.length} />
-        <CrosswordParticles highlightedIndicies={highlightedIndicies} crosswordDimensions={crosswordDimensions} />
+        <CrosswordAudio selectedLength={highlightedIndicies.length} numWords={words.length} numCompletedWords={completedWords.length} />
+
         {DEBUG ? <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={Math.PI / 2} beta={Math.PI / 4} radius={8} /> : <targetCamera name="camera1" position={new Vector3(crosswordWidth * 0.6, 0, -crosswordWidth * 1.5)} />}
         <hemisphericLight name='light1' intensity={0.7} direction={Vector3.Up()} />
-        {times(crosswordWidth, (x) => {
-          return times(crosswordHeight, (y) => {
-            return <CrosswordLetter
-              letter={ws.grid[x][y]}
-              key={`${x}-${y}`}
-              index={{ x, y }}
-              crosswordDimensions={crosswordDimensions}
-              highlighted={highlightedIndicies.some(i => i.x === x && i.y === y)}
-              setCurrentHover={setCurrentHover}
-              setFirstClicked={setFirstClicked}
-            />
-          })
-        })}
+        <CrosswordLetters crosswordDimensions={crosswordDimensions} letterGrid={ws.grid} highlightedIndicies={highlightedIndicies} setFirstClicked={setFirstClicked} setCurrentHover={setCurrentHover} />
         <CrosswordList crosswordDimensions={crosswordDimensions} completedWords={completedWords} words={words} position={new Vector3((crosswordWidth + 2.5) - crosswordWidth / 2, crosswordHeight / 2, 0)} />
       </Scene>
     </Engine>

@@ -40,7 +40,7 @@ interface CustomParticleSystemEngineSettings {
     targets?: Vector3[]
 }
 
-type EmissionType = 'sphere'
+type EmissionType = 'sphere' | 'locations'
 
 const randomRange = (min: number, max: number) => {
     return Math.random() * (max - min) + min;
@@ -60,6 +60,7 @@ export class CustomParticleSystemEngine {
     public emissionType: EmissionType = "sphere"
     public emitter = new Vector3(0, 0, 0);
     public emitRadius = 1;
+    public emitLocations: Vector3[] = [];
 
     constructor(private settings: CustomParticleSystemEngineSettings = {
         count: 5000,
@@ -168,6 +169,14 @@ export class CustomParticleSystemEngine {
                     const c = Math.cbrt(Math.random());
                     return vec.scale(c * this.emitRadius).add(this.emitter);
                 });
+                break;
+            case 'locations':
+                vectors = times(count, () => {
+                    const index = Math.floor(Math.random() * this.emitLocations.length);
+                    const vec = this.emitLocations[index];
+                    return vec
+                });
+                break;
         }
 
         //return vectors as an array of floats

@@ -32,28 +32,38 @@ interface Note {
 
 type NoteNumber = (typeof noteNumber)[NoteName];
 type Scale = (typeof noteNumber)[NoteName][];
-type Key = 'major' | 'minor'
+type Key = 'major' | 'minor' | 'phrygian dominant'
 
 const constructScale = (rootNote: Note, key: Key) => {
     const root = noteNumber[rootNote.note];
     const scale: Scale = [];
-    if (key === 'major') {
-        scale.push(root % 12 as NoteNumber);
-        scale.push((root + 2) % 12 as NoteNumber);
-        scale.push((root + 4) % 12 as NoteNumber);
-        scale.push((root + 5) % 12 as NoteNumber);
-        scale.push((root + 7) % 12 as NoteNumber);
-        scale.push((root + 9) % 12 as NoteNumber);
-        scale.push((root + 11) % 12 as NoteNumber);
-    }
-    else {
-        scale.push(root % 12 as NoteNumber);
-        scale.push((root + 2) % 12 as NoteNumber);
-        scale.push((root + 3) % 12 as NoteNumber);
-        scale.push((root + 5) % 12 as NoteNumber);
-        scale.push((root + 7) % 12 as NoteNumber);
-        scale.push((root + 9) % 12 as NoteNumber);
-        scale.push((root + 11) % 12 as NoteNumber);
+    switch (key) {
+        case 'major':
+            scale.push(root % 12 as NoteNumber);
+            scale.push((root + 2) % 12 as NoteNumber);
+            scale.push((root + 4) % 12 as NoteNumber);
+            scale.push((root + 5) % 12 as NoteNumber);
+            scale.push((root + 7) % 12 as NoteNumber);
+            scale.push((root + 9) % 12 as NoteNumber);
+            scale.push((root + 11) % 12 as NoteNumber);
+            break;
+        case 'minor':
+            scale.push(root % 12 as NoteNumber);
+            scale.push((root + 2) % 12 as NoteNumber);
+            scale.push((root + 3) % 12 as NoteNumber);
+            scale.push((root + 5) % 12 as NoteNumber);
+            scale.push((root + 7) % 12 as NoteNumber);
+            scale.push((root + 9) % 12 as NoteNumber);
+            scale.push((root + 11) % 12 as NoteNumber);
+            break;
+        case 'phrygian dominant':
+            scale.push(root % 12 as NoteNumber);
+            scale.push((root + 1) % 12 as NoteNumber);
+            scale.push((root + 4) % 12 as NoteNumber);
+            scale.push((root + 5) % 12 as NoteNumber);
+            scale.push((root + 7) % 12 as NoteNumber);
+            scale.push((root + 8) % 12 as NoteNumber);
+            scale.push((root + 10) % 12 as NoteNumber);
     }
     return scale;
 }
@@ -121,11 +131,11 @@ const getNextNote = (scale: Scale, currentNote: Note) => {
     throw new Error("check probability code")
 }
 
-export const useAudioEffect = (numLetters: number, numWords: number) => {
+export const useAudioEffect = (numLetters: number, numCompletedWords: number) => {
     const scene = useScene();
     const sourceNote = useMemo(() => ({ note: 'G#' as const, octave: 5 }), []);
     const rootNote = useMemo(() => ({ note: 'C' as const, octave: 4 }), []);
-    const scale = useMemo(() => constructScale(rootNote, 'major'), [rootNote]);
+    const scale = useMemo(() => constructScale(rootNote, 'phrygian dominant'), [rootNote]);
 
     const sound = useMemo(() => {
         if (!scene) return;
@@ -161,10 +171,10 @@ export const useAudioEffect = (numLetters: number, numWords: number) => {
     const [currentNote, setCurrentNote] = React.useState<Note>(rootNote)
 
     useEffect(() => {
-        if (success && numWords > 0)
+        if (success && numCompletedWords > 0)
             success[Math.floor(Math.random() * 2)].play()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [numWords])
+    }, [numCompletedWords])
 
     useEffect(() => {
         if (!sound || numLetters === 0) return;

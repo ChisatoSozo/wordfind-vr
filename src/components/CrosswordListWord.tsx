@@ -103,7 +103,7 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ word, posi
     </plane>
         <plane isVisible={false} ref={iconRef} width={1} height={1} name={`word${position.toString()}`} position={position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0))}>
             <standardMaterial name='wordMaterial' disableLighting={true}>
-                <texture onLoad={() => setIconReady(true)} name='wordTexture' assignTo="emissiveTexture" url={`/icons/${word}.png`} />
+                <texture onLoad={() => setIconReady(true)} name='wordTexture' assignTo="emissiveTexture" url={`/icons/pancake.png`} />
             </standardMaterial>
         </plane>
     </>

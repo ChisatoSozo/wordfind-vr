@@ -1,7 +1,7 @@
 //@ts-ignore
 import WordSearch from "@blex41/word-search";
 import { useMemo } from "react";
-import { cookingWordsWithIcons } from "../words/cooking";
+import { cookingWords } from "../words/cooking";
 
 
 const shuffle = (array: string[]) => {
@@ -38,7 +38,7 @@ export const useWordSearch = (crosswordDimensions: { x: number, y: number }, wor
             cols: crosswordDimensions.x,
             rows: crosswordDimensions.y,
             disabledDirections: ["N", "W", "NW", "SW"],
-            dictionary: shuffle(cookingWordsWithIcons),
+            dictionary: shuffle(cookingWords),
             maxWords: words,
             backwardsProbability: 0,
             upperCase: true,

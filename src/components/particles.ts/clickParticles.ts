@@ -10,7 +10,7 @@ const timer: {
     current?: number;
 } = {}
 
-export const makeClickParticles = (scene: Scene, start: Vector3, end: Vector3) => {
+export const makeClickParticles = (scene: Scene, locations: Vector3[]) => {
     if (!clickParticles.current) {
 
         const engine = new CustomParticleSystemEngine({
@@ -29,6 +29,7 @@ export const makeClickParticles = (scene: Scene, start: Vector3, end: Vector3) =
         // Where the particles come from
         engine.emitter = new Vector3(0, 0, 0); // the starting object, the emitter
         engine.emitRadius = 0.5;
+        engine.emissionType = "locations"
 
         // // Direction of each particle after it has been emitted
         // engine.direction1 = new Vector3(0, 0, -10);
@@ -47,9 +48,9 @@ export const makeClickParticles = (scene: Scene, start: Vector3, end: Vector3) =
     if (!clickParticles.current) return;
 
 
-    clickParticles.current.emitter = end.clone().add(start).scale(0.5)
 
-    //@ts-ignore
+    clickParticles.current.emitLocations = locations;
+
     clickParticles.current.start();
 
     if (timer.current) {
