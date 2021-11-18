@@ -7,7 +7,7 @@ import "./materials";
 import { SceneIntro } from './scenes/SceneIntro';
 import { SceneMenu } from './scenes/SceneMenu';
 import { VenueParticles } from './scenes/VenueParticles';
-import { dogWords } from './words/dogs';
+import { cookingWords } from './words/cooking';
 
 export const DEBUG = false;
 
@@ -58,7 +58,7 @@ export const App = () => {
         <hemisphericLight name='light1' intensity={0.7} direction={Vector3.Up()} />
         {scenes.map(scene => {
           const CurSceneComponent = scenesMap[scene] as VenueComponent;
-          return <CurSceneComponent key={scene} transitionScene={newScene} words={dogWords} crosswordDimensions={{ x: 8, y: 8 }} iconRoot='dogs' />
+          return <CurSceneComponent key={scene} transitionScene={newScene} words={cookingWords} crosswordDimensions={{ x: 8, y: 8 }} iconRoot='food' />
         })}
       </Scene>
     </Engine>
