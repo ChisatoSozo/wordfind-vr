@@ -1,7 +1,8 @@
-import { Mesh, StandardMaterial, Texture, Vector3 } from '@babylonjs/core';
+import { Mesh, Texture, Vector3 } from '@babylonjs/core';
 import { Control } from '@babylonjs/gui/2D/controls/control';
 import React, { useEffect, useRef, useState } from 'react';
 import { useScene } from 'react-babylonjs';
+import { useParticleLocations } from '../hooks/useParticleLocations';
 import { CustomParticleSystemEngine } from './particles.ts/CustomParticleSystemEngine';
 
 interface CrosswordListWordProps {
@@ -9,65 +10,24 @@ interface CrosswordListWordProps {
     position: Vector3
     completed: boolean
     index: number
+    iconRoot: string;
+    offset: Vector3;
 }
 
-export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ word, position, completed, index }) => {
-    const wordRef = useRef<Mesh>();
-    const iconRef = useRef<Mesh>();
+export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, word, position, completed, index, offset }) => {
+    const wordRef = useRef<Mesh>(null);
+    const iconRef = useRef<Mesh>(null);
 
     const scene = useScene()
 
-    const [wordParticleLocations, setWordParticleLocations] = useState<Vector3[]>()
-    const [wordParticleTargets, setWordParticleTargets] = useState<Vector3[]>()
     const [iconReady, setIconReady] = useState(false);
+
+    const wordParticleLocations = useParticleLocations(wordRef, 1000, 4, 1, offset)
+    const wordParticleTargets = useParticleLocations(iconRef, 1000, 1, 1, offset, true, iconReady)
     const [engine, setEngine] = useState<CustomParticleSystemEngine>();
-
     useEffect(() => {
-        if (!wordRef.current || !iconRef.current || !iconReady) return;
-        const wordMesh = wordRef.current;
-        const iconMesh = iconRef.current;
-
-        const texture = (wordMesh.material as StandardMaterial).emissiveTexture;
-        const iconTexture = (iconMesh.material as StandardMaterial).emissiveTexture;
-
-        if (!texture) return;
-        if (!iconTexture) return;
-
-        const pixels = texture.readPixels() as Uint8Array;
-        const iconPixels = iconTexture.readPixels() as Uint8Array;
-
-        const particles: Vector3[] = [];
-        const targets: Vector3[] = [];
-
-        while (particles.length < 1000) {
-            const x = Math.floor(Math.random() * texture.getSize().width);
-            const y = Math.floor(Math.random() * texture.getSize().height);
-            if (pixels[(y * texture.getSize().width + x) * 4 + 3] !== 0) {
-                const xPerc = x / texture.getSize().width;
-                const yPerc = y / texture.getSize().height;
-                const pos = new Vector3(4 * xPerc - 2, yPerc - 0.5, 0).add(wordMesh.getAbsolutePosition());
-                particles.push(pos);
-            }
-        }
-
-        while (targets.length < 1000) {
-            const x = Math.floor(Math.random() * iconTexture.getSize().width);
-            const y = Math.floor(Math.random() * iconTexture.getSize().height);
-            if (iconPixels[(y * iconTexture.getSize().width + x) * 4 + 3] !== 0 && iconPixels[(y * iconTexture.getSize().width + x) * 4] < 0.5) {
-                const xPerc = x / iconTexture.getSize().width;
-                const yPerc = y / iconTexture.getSize().height;
-                const pos = new Vector3(xPerc - 0.5, yPerc - 0.5, 0).add(iconMesh.getAbsolutePosition());
-                targets.push(pos);
-            }
-        }
-
-        setWordParticleLocations(particles);
-        setWordParticleTargets(targets);
-    }, [iconReady]);
-
-    useEffect(() => {
-        if (!completed || !scene || !wordParticleLocations || !wordParticleTargets) return;
-        const engine = new CustomParticleSystemEngine({
+        if (!scene || !wordParticleLocations || !wordParticleTargets || engine) return;
+        const _engine = new CustomParticleSystemEngine({
             count: wordParticleLocations.length,
             minLifespan: -1,
             maxLifespan: -1,
@@ -80,13 +40,18 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ word, posi
             initialPositions: wordParticleLocations,
             targets: wordParticleTargets,
         }, scene)
-
-        setEngine(engine);
-    }, [completed, scene, wordParticleLocations, wordParticleTargets])
+        setEngine(_engine)
+    }, [engine, scene, wordParticleLocations, wordParticleTargets])
 
     useEffect(() => {
+        if (!completed || !scene || !wordParticleLocations || !wordParticleTargets || !engine) return;
+        engine.init();
+    }, [completed, engine, scene, wordParticleLocations, wordParticleTargets])
+
+    useEffect(() => {
+        let lastEngine = engine
         return () => {
-            if (engine) engine.dispose();
+            if (lastEngine) lastEngine.dispose();
         }
     }, [engine])
 
@@ -103,7 +68,7 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ word, posi
     </plane>
         <plane isVisible={false} ref={iconRef} width={1} height={1} name={`word${position.toString()}`} position={position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0))}>
             <standardMaterial name='wordMaterial' disableLighting={true}>
-                <texture onLoad={() => setIconReady(true)} name='wordTexture' assignTo="emissiveTexture" url={`/icons/pancake.png`} />
+                <texture onLoad={() => setIconReady(true)} name='wordTexture' assignTo="emissiveTexture" url={`/icons/${iconRoot}/${word}.png`} />
             </standardMaterial>
         </plane>
     </>

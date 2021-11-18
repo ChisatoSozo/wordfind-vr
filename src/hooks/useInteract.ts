@@ -1,16 +1,26 @@
-import React, { useCallback, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react';
 
-export const useInteract = (callback: ((() => () => void) | (() => void))) => {
-    const [interacted, setInteracted] = React.useState(false)
+export const _interacted = {
+    current: false
+};
+
+export const useInteract = <T>(callback: (() => T)) => {
+    const [interacted, setInteracted] = useState(_interacted.current);
+
     useEffect(() => {
-        const onInteract = () => setInteracted(true)
-        window.addEventListener('click', onInteract)
-        return () => window.removeEventListener('click', onInteract)
+        if (!_interacted.current) {
+            const _callback = () => {
+                setInteracted(true)
+                _interacted.current = true;
+            }
+            window.addEventListener('pointerdown', _callback)
+            return () => window.removeEventListener('pointerdown', _callback)
+        }
     }, [])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const realCallback = useCallback(callback, [])
-    useEffect(() => {
-        if (!interacted) return
-        realCallback()
-    }, [interacted, realCallback])
+
+    return useMemo(() => {
+        if (!interacted) return;
+        return callback()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [interacted])
 }

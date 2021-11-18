@@ -11,9 +11,10 @@ interface CrosswordLettersProps {
     highlightedIndicies: { x: number, y: number }[];
     setFirstClicked: Dispatch<SetStateAction<{ x: number, y: number } | null>>;
     setCurrentHover: Dispatch<SetStateAction<{ x: number, y: number } | null>>;
+    offset: Vector3;
 }
 
-export const CrosswordLetters: React.FC<CrosswordLettersProps> = ({ crosswordDimensions, letterGrid, highlightedIndicies, setFirstClicked, setCurrentHover }) => {
+export const CrosswordLetters: React.FC<CrosswordLettersProps> = ({ crosswordDimensions, letterGrid, highlightedIndicies, setFirstClicked, setCurrentHover, offset }) => {
 
     const scene = useScene();
 
@@ -34,6 +35,7 @@ export const CrosswordLetters: React.FC<CrosswordLettersProps> = ({ crosswordDim
                 setCurrentHover={setCurrentHover}
                 setFirstClicked={setFirstClicked}
                 addClickParticles={addClickParticles}
+                offset={offset}
             />
         })
     })}</>

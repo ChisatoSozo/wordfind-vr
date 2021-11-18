@@ -36,9 +36,10 @@ const makeVelocityPixelShader = (velocityModifier: string, uniforms = ''): strin
     uniform vec2 resolution;
     uniform sampler2D positionSampler;
     uniform sampler2D selfSampler;
+    uniform vec3 gravity;
 
     ${uniforms}
-
+    
     uniform float setValues;
     uniform float setValuesFloats[${MAX_VALUES_PER_FRAME * 3}];
     uniform float setValuesStart;
@@ -52,6 +53,7 @@ const makeVelocityPixelShader = (velocityModifier: string, uniforms = ''): strin
         vec4 velocity = texture2D( selfSampler, uv );
 
         ${velocityModifier}
+        outVelocity = outVelocity + vec4(gravity * delta, 0.);
 
         if(setValues > 0.0 && id >= setValuesStart && id < setValuesStart + setValuesLength) {
             int startIndex = int(id - setValuesStart) * 3;

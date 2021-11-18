@@ -1,6 +1,8 @@
 import { Sound } from '@babylonjs/core';
 import React, { useEffect, useMemo } from 'react';
 import { useScene } from 'react-babylonjs';
+import { Sampler } from 'tone';
+import { useInteract } from './useInteract';
 
 type NoteName = 'A' | 'A#' | 'B' | 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#'
 
@@ -133,55 +135,55 @@ const getNextNote = (scale: Scale, currentNote: Note) => {
 
 export const useAudioEffect = (numLetters: number, numCompletedWords: number) => {
     const scene = useScene();
-    const sourceNote = useMemo(() => ({ note: 'G#' as const, octave: 5 }), []);
     const rootNote = useMemo(() => ({ note: 'C' as const, octave: 4 }), []);
     const scale = useMemo(() => constructScale(rootNote, 'phrygian dominant'), [rootNote]);
 
     const sound = useMemo(() => {
         if (!scene) return;
-        return new Sound("highlightSound", "/sounds/Vocal-G#5.wav", scene, null, {
-            loop: false,
-            autoplay: false,
-            volume: 0.5
-        });
+        const sound = new Sampler({
+            urls: {
+                "G#5": "Vocal.wav",
+            },
+            baseUrl: "/sounds/",
+        }).toDestination()
+        sound.volume.value = 0.5;
+        return sound;
     }, [scene])
 
-    useMemo(() => {
-        if (!scene) return;
-        return new Sound("ambience", "/sounds/C-Ambience.mp3", scene, null, {
-            loop: true,
-            autoplay: true,
-            volume: 0.5
-        });
-    }, [scene])
-
-    const success = useMemo(() => {
-        if (!scene) return;
-        return [new Sound("success", "/sounds/success.mp3", scene, null, {
-            loop: false,
-            autoplay: false,
-            volume: 0.5
-        }), new Sound("success", "/sounds/success1.mp3", scene, null, {
-            loop: false,
-            autoplay: false,
-            volume: 0.5
-        })];
-    }, [scene])
+    const success = useInteract(() => {
+        const sounds = [new Sampler({
+            urls: {
+                "C4": "success.mp3",
+            },
+            baseUrl: "/sounds/",
+        }).toDestination(), new Sampler({
+            urls: {
+                "C4": "success1.mp3",
+            },
+            baseUrl: "/sounds/",
+        }).toDestination()]
+        sounds.forEach(sound => sound.volume.value = 0.5)
+        return sounds
+    })
 
     const [currentNote, setCurrentNote] = React.useState<Note>(rootNote)
 
     useEffect(() => {
-        if (success && numCompletedWords > 0)
-            success[Math.floor(Math.random() * 2)].play()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [numCompletedWords])
+        if (success && numCompletedWords > 0) {
+            const _success = success[Math.floor(Math.random() * 2)];
+            if (_success.loaded) {
+                _success.triggerAttackRelease("C4", "4m")
+            }
+        }
+    }, [numCompletedWords, success])
 
     useEffect(() => {
         if (!sound || numLetters === 0) return;
 
         const nowNote = numLetters === 1 ? { note: 'C' as const, octave: Math.random() > 0.5 ? 4 : 5 } : currentNote;
 
-        playNote(sound, sourceNote, nowNote);
+        if (sound.loaded)
+            sound.triggerAttackRelease(nowNote.note + nowNote.octave.toString(), "1m");
 
         const nextNote = getNextNote(scale, nowNote);
         setCurrentNote(nextNote);

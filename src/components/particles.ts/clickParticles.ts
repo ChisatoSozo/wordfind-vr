@@ -42,6 +42,7 @@ export const makeClickParticles = (scene: Scene, locations: Vector3[]) => {
 
         // engine.createSphereEmitter(0.5)
 
+        engine.init();
         clickParticles.current = engine;
     }
 

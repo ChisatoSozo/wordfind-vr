@@ -36,6 +36,7 @@ interface CustomParticleSystemEngineSettings {
     direction2: Vector3
     minVelocity: number
     maxVelocity: number
+    gravity?: Vector3
     initialPositions?: Vector3[]
     targets?: Vector3[]
 }
@@ -52,10 +53,11 @@ export class CustomParticleSystemEngine {
     private shaderMaterial: ShaderMaterial;
     private planes: Mesh;
 
-    private observable: Nullable<Observer<Scene>>
+    private observable?: Nullable<Observer<Scene>>
 
     private currentIndex = 0;
     private active = false;
+    public initialized = false;
 
     public emissionType: EmissionType = "sphere"
     public emitter = new Vector3(0, 0, 0);
@@ -71,7 +73,7 @@ export class CustomParticleSystemEngine {
         direction1: new Vector3(1, 1, 10),
         direction2: new Vector3(-1, -1, 10),
         minVelocity: 0.1,
-        maxVelocity: 0.3
+        maxVelocity: 0.3,
     }, private scene: Scene, fragmentShader = "particle") {
         const WIDTH = nextPowerOfTwo(Math.sqrt(settings.count));
 
@@ -99,6 +101,7 @@ export class CustomParticleSystemEngine {
             texture.setFloat('setValuesLength', 0)
             texture.setTexture('positionSampler', initialPositionsTexture);
             texture.setTexture('velocitySampler', initialVelocitiesTexture);
+            texture.setVector3('gravity', settings.gravity || new Vector3(0.00001, 0.00001, 0.00001));
             targetsTexture && texture.setTexture('targetSampler', targetsTexture);
         }
 
@@ -122,6 +125,7 @@ export class CustomParticleSystemEngine {
         );
 
         this.shaderMaterial.disableDepthWrite = true;
+        this.shaderMaterial.backFaceCulling = false;
 
         this.shaderMaterial.setTexture("positionSampler", initialPositionsTexture)
         this.shaderMaterial.setTexture("velocitySampler", initialVelocitiesTexture)
@@ -131,8 +135,16 @@ export class CustomParticleSystemEngine {
         this.shaderMaterial.setFloat("maxSize", settings.maxSize);
 
         this.planes.material = this.shaderMaterial;
+        this.planes.alwaysSelectAsActiveMesh = true;
 
         this.currentIndex = 0;
+
+        this.planes.isVisible = false;
+    }
+
+    init() {
+        this.planes.isVisible = true;
+        this.initialized = true;
 
         this.observable = this.scene.onBeforeRenderObservable.add((scene) => {
             const deltaS = scene.deltaTime / 1000;
@@ -141,10 +153,11 @@ export class CustomParticleSystemEngine {
     }
 
     dispose() {
-        this.positionTexture.dispose();
-        this.shaderMaterial.dispose();
-        this.planes.dispose();
-        this.scene.onBeforeRenderObservable.remove(this.observable);
+        this.positionTexture.dispose()
+        this.velocityTexture.dispose()
+        this.shaderMaterial.dispose()
+        this.planes.dispose()
+        if (this.observable) this.scene.onBeforeRenderObservable.remove(this.observable);
     }
 
     start() {
@@ -234,7 +247,5 @@ export class CustomParticleSystemEngine {
             this.shaderMaterial.setTexture("velocitySampler", newVelocityTexture);
             this.positionTexture.setTexture("velocitySampler", newVelocityTexture);
         }
-
     }
-
 }

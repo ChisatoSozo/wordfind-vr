@@ -1,7 +1,6 @@
 //@ts-ignore
 import WordSearch from "@blex41/word-search";
 import { useMemo } from "react";
-import { cookingWords } from "../words/cooking";
 
 
 const shuffle = (array: string[]) => {
@@ -31,20 +30,20 @@ interface WS {
     }[]
 }
 
-export const useWordSearch = (crosswordDimensions: { x: number, y: number }, words: number): WS => {
+export const useWordSearch = (crosswordDimensions: { x: number, y: number }, words: string[]): WS => {
     return useMemo(() => {
 
         const options = {
             cols: crosswordDimensions.x,
             rows: crosswordDimensions.y,
             disabledDirections: ["N", "W", "NW", "SW"],
-            dictionary: shuffle(cookingWords),
-            maxWords: words,
+            dictionary: shuffle(words),
+            maxWords: 100,
             backwardsProbability: 0,
             upperCase: true,
             diacritics: false
         };
 
         return new WordSearch(options);
-    }, [crosswordDimensions, words])
+    }, [crosswordDimensions.x, crosswordDimensions.y, words])
 }

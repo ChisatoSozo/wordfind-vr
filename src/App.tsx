@@ -1,91 +1,65 @@
 import { Color4, Vector3 } from '@babylonjs/core';
-import { times } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Engine, Scene } from 'react-babylonjs';
-import { Capsules } from './components/Capsules';
-import { CrosswordAudio } from './components/CrosswordAudio';
-import { CrosswordLetters } from './components/CrosswordLetters';
-import { CrosswordList } from './components/CrosswordList';
 import { Pipeline } from './components/Pipeline';
 import { useWindowSize } from './hooks/useWindowSize';
-import { useWordSearch } from './hooks/useWordSearch';
 import "./materials";
+import { SceneIntro } from './scenes/SceneIntro';
+import { SceneMenu } from './scenes/SceneMenu';
+import { VenueParticles } from './scenes/VenueParticles';
+import { dogWords } from './words/dogs';
 
 export const DEBUG = false;
+
+
+const scenesMap = {
+  intro: SceneIntro,
+  menu: SceneMenu,
+  particles: VenueParticles
+} as const
+
+type SceneName = keyof typeof scenesMap;
+
+interface SceneProps {
+  transitionScene: (oldScene: SceneName, newScene: SceneName, transitionTime: number) => void;
+}
+
+interface VenueProps extends SceneProps {
+  words: string[];
+  crosswordDimensions: { x: number, y: number };
+  iconRoot: string;
+}
+
+export type SceneComponent = React.FC<SceneProps>;
+export type VenueComponent = React.FC<VenueProps>;
 
 export const App = () => {
   const windowSize = useWindowSize();
 
-  const crosswordWidth = 8;
-  const crosswordHeight = 8;
-  const crosswordDimensions = useMemo(() => ({ x: crosswordWidth, y: crosswordHeight }), []);
-  const ws = useWordSearch(crosswordDimensions, 20);
-  const words = useMemo(() => ws.words.map(word => word.word), [ws]);
-
-  const [firstClicked, setFirstClicked] = useState<{ x: number, y: number } | null>(null);
-  const [currentHover, setCurrentHover] = useState<{ x: number, y: number } | null>(null);
-
-  const [completedWords, setCompletedWords] = useState<string[]>([]);
-  const [solvedCoordinatePairs, setSolvedCoordinatePairs] = useState<[{ x: number, y: number }, { x: number, y: number }][]>([]);
-  const [highlightedIndicies, setHighlightedIndicies] = useState<{ x: number, y: number }[]>([]);
+  const [scenes, setScenes] = useState<SceneName[]>(["intro"])
 
   useEffect(() => {
-    if (!firstClicked && highlightedIndicies.length !== 0) {
-      const word = highlightedIndicies.map(index => ws.grid[index.x][index.y]).join('');
+    console.log(scenes)
+  }, [scenes])
 
-      if (words.includes(word.toLowerCase())) {
-        setCompletedWords([...completedWords, word]);
-        setSolvedCoordinatePairs([...solvedCoordinatePairs, [highlightedIndicies[0], highlightedIndicies[highlightedIndicies.length - 1]]]);
-      }
-      setHighlightedIndicies([]);
-      return;
-    }
-  }, [completedWords, firstClicked, highlightedIndicies, solvedCoordinatePairs, words, ws.grid])
+  const newScene = useCallback((oldScene: SceneName, newScene: SceneName, transitionTime: number) => {
+    setScenes(scenes => [...scenes, newScene])
+    window.setTimeout(() => {
+      setScenes(scenes => scenes.filter(scene => scene !== oldScene))
+    }, transitionTime);
+  }, []);
 
-  useEffect(() => {
-    if (!firstClicked) return;
-    if (!currentHover) return;
-
-    const delta = { x: currentHover.x - firstClicked.x, y: currentHover.y - firstClicked.y };
-
-    if (
-      delta.x === 0 ||
-      delta.y === 0 ||
-      Math.abs(delta.x) === Math.abs(delta.y)
-    ) {
-      const max = Math.max(Math.abs(delta.x), Math.abs(delta.y));
-
-      if (max === 0) {
-        setHighlightedIndicies([{ ...firstClicked }]);
-        return;
-      }
-
-      const norm = { x: delta.x / max, y: delta.y / max };
-
-      const newHighlightedIndicies = times(max + 1, i => {
-        const x = firstClicked.x + i * norm.x;
-        const y = firstClicked.y + i * norm.y;
-        return { x, y };
-      });
-
-      setHighlightedIndicies(newHighlightedIndicies);
-      return;
-    }
-    setHighlightedIndicies([]);
-
-  }, [firstClicked, currentHover])
 
   return <div>
     <Engine width={windowSize.width} height={windowSize.height} canvasId='babylonJS' >
       <Scene clearColor={new Color4(0, 0, 0, 1)}>
         <Pipeline />
-        <Capsules solvedCoordinatePairs={solvedCoordinatePairs} crosswordDimensions={crosswordDimensions} />
-        <CrosswordAudio selectedLength={highlightedIndicies.length} numWords={words.length} numCompletedWords={completedWords.length} />
-
-        {DEBUG ? <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={Math.PI / 2} beta={Math.PI / 4} radius={8} /> : <targetCamera name="camera1" position={new Vector3(crosswordWidth * 0.6, 0, -crosswordWidth * 1.5)} />}
+        {DEBUG ? <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={Math.PI / 2} beta={Math.PI / 4} radius={8} /> : <targetCamera name="camera1" position={new Vector3(0, 0, 0)} />}
         <hemisphericLight name='light1' intensity={0.7} direction={Vector3.Up()} />
-        <CrosswordLetters crosswordDimensions={crosswordDimensions} letterGrid={ws.grid} highlightedIndicies={highlightedIndicies} setFirstClicked={setFirstClicked} setCurrentHover={setCurrentHover} />
-        <CrosswordList crosswordDimensions={crosswordDimensions} completedWords={completedWords} words={words} position={new Vector3((crosswordWidth + 2.5) - crosswordWidth / 2, crosswordHeight / 2, 0)} />
+        {scenes.map(scene => {
+          const CurSceneComponent = scenesMap[scene] as VenueComponent;
+          return <CurSceneComponent key={scene} transitionScene={newScene} words={dogWords} crosswordDimensions={{ x: 8, y: 8 }} iconRoot='dogs' />
+        })}
       </Scene>
     </Engine>
   </div>
