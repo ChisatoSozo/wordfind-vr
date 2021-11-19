@@ -46,7 +46,7 @@ export type VenueComponent = React.FC<VenueProps>;
 export const App = () => {
   const windowSize = useWindowSize();
 
-  const [scenes, setScenes] = useState<SceneName[]>(["menu"])
+  const [scenes, setScenes] = useState<SceneName[]>(["intro"])
   const [venueDefinition, setVenueDefinition] = useState<VenueDefinition>();
 
   const newScene = useCallback((oldScene: SceneName, newScene: SceneName, transitionTime: number, venueDefinition?: VenueDefinition) => {
@@ -62,7 +62,7 @@ export const App = () => {
     <Engine width={windowSize.width} height={windowSize.height} canvasId='babylonJS' >
       <Scene clearColor={new Color4(0, 0, 0, 1)}>
         <Pipeline />
-        {DEBUG ? <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={-Math.PI / 2} beta={Math.PI / 2} radius={8} /> : <targetCamera name="camera1" position={new Vector3(0, 0, 0)} />}
+        {DEBUG ? <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={-Math.PI / 2} beta={Math.PI / 2} radius={8} /> : <freeCamera name="camera1" position={new Vector3(0, 0, 0)} />}
         <hemisphericLight name='light1' intensity={0.7} direction={Vector3.Up()} />
         {scenes.map(scene => {
           const CurSceneComponent = scenesMap[scene] as VenueComponent;

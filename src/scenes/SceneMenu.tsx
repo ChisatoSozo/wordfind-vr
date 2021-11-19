@@ -8,7 +8,7 @@ import { backgroundSound, playSound } from '../sounds/Sounds'
 import { generateLevelGraph, LevelNode } from '../utils/generateLevelGraph'
 
 const SEED = 'seed';
-const levelNodeRanks = generateLevelGraph(SEED, 4, 10);
+const levelNodeRanks = generateLevelGraph(SEED, 4, 30);
 
 const getNodePosition = (node: LevelNode, nodeCount: number, index: number) => {
     const yOffset = ((nodeCount - 1) / 2) - index;

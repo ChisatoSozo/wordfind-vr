@@ -142,7 +142,7 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
             generateMipMaps={true}
             samplingMode={Texture.TRILINEAR_SAMPLINGMODE}
         >
-            <textBlock name='cancel-text' text={"Crossword VR"} fontSize={512} fontStyle='bold' color={'white'} />
+            <textBlock name='cancel-text' text={"Wordfind VR"} fontSize={512} fontStyle='bold' color={'white'} />
         </advancedDynamicTexture>
     </plane>
         <plane isVisible={false} width={2} height={0.5} ref={planeRef2} name={`intro plane`} position={new Vector3(5.5, -1.3, 10)}>
