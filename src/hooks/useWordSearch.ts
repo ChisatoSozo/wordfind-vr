@@ -1,6 +1,7 @@
 //@ts-ignore
 import WordSearch from "@blex41/word-search";
 import { useMemo } from "react";
+import { WordList } from "../words";
 
 
 const shuffle = (array: string[]) => {
@@ -30,14 +31,14 @@ interface WS {
     }[]
 }
 
-export const useWordSearch = (crosswordDimensions: { x: number, y: number }, words: string[]): WS => {
+export const useWordSearch = (crosswordDimensions: { x: number, y: number }, words: WordList): WS => {
     return useMemo(() => {
 
         const options = {
             cols: crosswordDimensions.x,
             rows: crosswordDimensions.y,
-            disabledDirections: ["N", "W", "NW", "SW"],
-            dictionary: shuffle(words),
+            disabledDirections: ["N", "W", "NW", "SW", "NE"],
+            dictionary: shuffle([...words]),
             maxWords: 100,
             backwardsProbability: 0,
             upperCase: true,

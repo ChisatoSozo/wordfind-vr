@@ -9,4 +9,4 @@ export const dogWords = [
     'terrier',
     'whippet', 'pug',
     'retriever'
-]
+] as const

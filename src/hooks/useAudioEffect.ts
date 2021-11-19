@@ -1,4 +1,3 @@
-import { Sound } from '@babylonjs/core';
 import React, { useEffect, useMemo } from 'react';
 import { useScene } from 'react-babylonjs';
 import { Sampler } from 'tone';
@@ -70,23 +69,6 @@ const constructScale = (rootNote: Note, key: Key) => {
     return scale;
 }
 
-
-
-const calcNoteFrequency = (note: Note) => {
-    const numberInOctave = noteNumber[note.note];
-    const octave = note.octave;
-    return 440 * Math.pow(2, (numberInOctave + 12 * (octave - 4)) / 12);
-}
-
-const playNote = (sound: Sound, sourceNote: Note, targetNote: Note) => {
-    const noteFrequency = calcNoteFrequency(sourceNote);
-    const targetFrequency = calcNoteFrequency(targetNote);
-    const ratio = targetFrequency / noteFrequency;
-
-    sound.setPlaybackRate(ratio);
-    sound.play(undefined, undefined, 10 * ratio);
-}
-
 const getNextNote = (scale: Scale, currentNote: Note) => {
     const scaleIndex = scale.indexOf(noteNumber[currentNote.note]);
 
@@ -146,7 +128,7 @@ export const useAudioEffect = (numLetters: number, numCompletedWords: number) =>
             },
             baseUrl: "/sounds/",
         }).toDestination()
-        sound.volume.value = 0.5;
+        sound.volume.value = -10;
         return sound;
     }, [scene])
 
@@ -162,7 +144,7 @@ export const useAudioEffect = (numLetters: number, numCompletedWords: number) =>
             },
             baseUrl: "/sounds/",
         }).toDestination()]
-        sounds.forEach(sound => sound.volume.value = 0.5)
+        sounds.forEach(sound => sound.volume.value = -10)
         return sounds
     })
 

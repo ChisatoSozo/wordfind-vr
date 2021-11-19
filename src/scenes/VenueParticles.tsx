@@ -17,9 +17,10 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
     const rootRef = useRef<TransformNode>(null)
     useSlideIn(rootRef)
 
+    console.log(crosswordDimensions, _words)
     const ws = useWordSearch(crosswordDimensions, _words);
     const words = useMemo(() => ws.words.map(word => word.word), [ws]);
-    useInteract(() => playSound(backgroundSound, 0.5, true));
+    useInteract(() => playSound(backgroundSound, 0.3, true));
 
     const [firstClicked, setFirstClicked] = useState<{ x: number, y: number } | null>(null);
     const [currentHover, setCurrentHover] = useState<{ x: number, y: number } | null>(null);
@@ -30,7 +31,7 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
 
     useEffect(() => {
         if (!firstClicked && highlightedIndicies.length !== 0) {
-            const word = highlightedIndicies.map(index => ws.grid[index.x][index.y]).join('');
+            const word = highlightedIndicies.map(index => ws.grid[index.y][index.x]).join('');
 
             if (words.includes(word.toLowerCase())) {
                 setCompletedWords([...completedWords, word]);

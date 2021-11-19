@@ -26,7 +26,7 @@ export const CrosswordLetters: React.FC<CrosswordLettersProps> = ({ crosswordDim
     return <>{times(crosswordDimensions.x, (x) => {
         return times(crosswordDimensions.y, (y) => {
             return <CrosswordLetter
-                letter={letterGrid[x][y]}
+                letter={letterGrid[y][x]}
                 key={`${x}-${y}`}
                 index={{ x, y }}
                 crosswordDimensions={crosswordDimensions}

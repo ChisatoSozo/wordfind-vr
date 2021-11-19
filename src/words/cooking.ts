@@ -19,4 +19,4 @@ export const cookingWords = [
     'pastry', 'grill', 'marinade', 'soy', 'vinegar',
     'tea', 'yogurt', 'sauce', 'poutine',
     'wine', 'yeast'
-]
+] as const

@@ -108,7 +108,7 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
         scene.beginDirectAnimation(particleSystem, [animation, animation2], 0, 180, false, 1,);
 
         window.setTimeout(() => {
-            transitionScene("intro", "particles", 10000)
+            transitionScene("intro", "menu", 10000)
             if (!particleSystem) return;
             particleSystem.stop();
 
