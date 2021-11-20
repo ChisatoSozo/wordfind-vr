@@ -3,7 +3,8 @@ var fs = require('fs'), request = require('request');
 const KEY = '4216377ee6dc443787d8c8135aa1895c';
 const SECRET = 'c5034cfe991f4ee78b8780bef0c04d34';
 
-const dogWords = [
+const wordCategory = "plants";
+const words = [
     "acorn",
     "alfalfa",
     "bamboo",
@@ -80,11 +81,13 @@ const validWords = []
 
 const promises = [];
 
-dogWords.forEach((word) => {
+fs.mkdirSync("./public/icons/" + wordCategory);
+
+words.forEach((word) => {
     promises.push(new Promise(resolve => nounProject.getIconByTerm(word, function (err, data) {
         console.log(err)
         if (!err) {
-            download(data.icon.preview_url, "./public/icons/plants/" + word + ".png", () => { })
+            download(data.icon.preview_url, "./public/icons/" + wordCategory + "/" + word + ".png", () => { })
             validWords.push(word)
         }
         resolve()
