@@ -45,7 +45,7 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
     }, [scene])
 
     const engineAndParticleSystem = useMemo(() => {
-        if (!scene || !wordParticleLocations) return;
+        if (!scene || !wordParticleLocations || !planeRef.current) return;
         const engine = new CustomParticleSystemEngine({
             count: wordParticleLocations.length,
             minLifespan: -1,
@@ -58,6 +58,7 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
             maxVelocity: 1,
             gravity: new Vector3(0, 0, -1),
             initialPositions: wordParticleLocations,
+            emitter: planeRef.current
         }, scene)
 
         const particleSystem = new GPUParticleSystem("particles", { capacity: 1000000 }, scene);

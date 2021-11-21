@@ -30,7 +30,6 @@ const capitalizeFirstLetter = (string: string) => {
 
 const makeLevel = (scene: SceneName, wordListName: WordListName, levelNumber: number, rng: prng): LevelDefinition => {
     const difficulty = Math.log2(Math.max(levelNumber, 1)) * DIFFICULTY_RAMP + 1;
-    console.log(difficulty)
     const crosswordSize = 64 * difficulty;
 
     const isAssymetric = rng() < ASSYMETRY_CHANCE;
@@ -47,8 +46,6 @@ const makeLevel = (scene: SceneName, wordListName: WordListName, levelNumber: nu
 
 
     const levelName = capitalizeFirstLetter(wordListName) + " " + arabToRoman(levelNumber);
-
-    console.log(x, y)
 
     return {
         scene,

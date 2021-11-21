@@ -1,4 +1,4 @@
-import { TransformNode, Vector3 } from '@babylonjs/core';
+import { Mesh, Vector3 } from '@babylonjs/core';
 import { times } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { VenueComponent } from '../App';
@@ -14,10 +14,10 @@ import { backgroundSound, playSound } from '../sounds/Sounds';
 export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _words, iconRoot }) => {
 
     const offset = useMemo(() => new Vector3(-0.5 * crosswordDimensions.x, 0, 1.5 * Math.max(crosswordDimensions.y, crosswordDimensions.x)), [crosswordDimensions.x, crosswordDimensions.y]);
-    const rootRef = useRef<TransformNode>(null)
-    useSlideIn(rootRef)
+    const startPosition = useMemo(() => new Vector3(0, 0, 10000).add(offset), [offset]);
+    const rootRef = useRef<Mesh>(null)
+    useSlideIn(rootRef, new Vector3(0, 0, 0).add(offset))
 
-    console.log(crosswordDimensions, _words)
     const ws = useWordSearch(crosswordDimensions, _words);
     const words = useMemo(() => ws.words.map(word => word.word), [ws]);
     useInteract(() => playSound(backgroundSound, 0.3, true));
@@ -75,12 +75,13 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
 
     }, [firstClicked, currentHover])
 
-    return <transformNode name='root' ref={rootRef} position={new Vector3(0, 0, 10000)}>
-        <transformNode name="particleTransform" position={offset}>
-            <Capsules solvedCoordinatePairs={solvedCoordinatePairs} crosswordDimensions={crosswordDimensions} />
-            <CrosswordAudio selectedLength={highlightedIndicies.length} numWords={words.length} numCompletedWords={completedWords.length} />
-            <CrosswordLetters crosswordDimensions={crosswordDimensions} letterGrid={ws.grid} highlightedIndicies={highlightedIndicies} setFirstClicked={setFirstClicked} setCurrentHover={setCurrentHover} offset={offset} />
-            <CrosswordList crosswordDimensions={crosswordDimensions} completedWords={completedWords} words={words} position={new Vector3((crosswordDimensions.x + 2.5) - crosswordDimensions.x / 2, crosswordDimensions.y / 2, 0)} iconRoot={iconRoot} offset={offset} />
-        </transformNode>
-    </transformNode>
+    // useDrag(rootRef)
+
+    return <plane height={1000} width={100000} name='root' ref={rootRef} position={startPosition}>
+        <standardMaterial name="background" alpha={0} />
+        <Capsules solvedCoordinatePairs={solvedCoordinatePairs} crosswordDimensions={crosswordDimensions} />
+        <CrosswordAudio selectedLength={highlightedIndicies.length} numWords={words.length} numCompletedWords={completedWords.length} />
+        <CrosswordLetters crosswordDimensions={crosswordDimensions} letterGrid={ws.grid} highlightedIndicies={highlightedIndicies} setFirstClicked={setFirstClicked} setCurrentHover={setCurrentHover} parent={rootRef} />
+        <CrosswordList crosswordDimensions={crosswordDimensions} completedWords={completedWords} words={words} position={new Vector3((crosswordDimensions.x + 2.5) - crosswordDimensions.x / 2, crosswordDimensions.y / 2, 0)} iconRoot={iconRoot} />
+    </plane>
 }

@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useHover } from "react-babylonjs";
 import { useMouseDown, useMouseUp } from "../forks/useMouse";
 import { useParticleLocations } from "../hooks/useParticleLocations";
+import { PARTICLES_PER_ICON } from "../scenes/SceneMenu";
 
 interface CrosswordLetterProps {
     letter: string;
@@ -16,11 +17,9 @@ interface CrosswordLetterProps {
     recentlyHighlighted: boolean;
 
     addClickParticles: (locaitons: Vector3[]) => void;
-
-    offset: Vector3;
 }
 
-export const CrosswordLetter: React.FC<CrosswordLetterProps> = ({ letter, index, crosswordDimensions, setCurrentHover, setFirstClicked, highlighted, recentlyHighlighted, addClickParticles, offset }) => {
+export const CrosswordLetter: React.FC<CrosswordLetterProps> = ({ letter, index, crosswordDimensions, setCurrentHover, setFirstClicked, highlighted, recentlyHighlighted, addClickParticles }) => {
     const [hovered, setHovered] = useState(false);
 
     const position = useMemo(() => new Vector3(index.x - crosswordDimensions.x / 2, -index.y + crosswordDimensions.y / 2, 0), [index, crosswordDimensions]);
@@ -52,7 +51,7 @@ export const CrosswordLetter: React.FC<CrosswordLetterProps> = ({ letter, index,
         sphereRef
     )
 
-    const wordParticleLocations = useParticleLocations(planeRef, 1000, 1, 1, offset)
+    const wordParticleLocations = useParticleLocations(planeRef, PARTICLES_PER_ICON, 1, 1, undefined, undefined, position)
 
     useEffect(() => {
         if (!recentlyHighlighted || !wordParticleLocations) return;
