@@ -40,6 +40,7 @@ interface CustomParticleSystemEngineSettings {
     gravity?: Vector3
     initialPositions?: Vector3[]
     targets?: Vector3[]
+    debug?: boolean
 }
 
 type EmissionType = 'sphere' | 'locations'
@@ -151,6 +152,9 @@ export class CustomParticleSystemEngine {
 
         this.observable = this.scene.onBeforeRenderObservable.add((scene) => {
             const deltaS = scene.deltaTime / 1000;
+            if (this.settings.debug) {
+                this.positionTexture.readPixelsAsync()?.then(console.log)
+            }
             this.update(deltaS);
         });
     }

@@ -7,8 +7,8 @@ import "./materials";
 import { SceneIntro } from './scenes/SceneIntro';
 import { SceneMenu } from './scenes/SceneMenu';
 import { VenueParticles } from './scenes/VenueParticles';
+import { defaultNode } from './utils/generateLevelGraph';
 import { WordList, WordListName } from './words';
-import { cookingWords } from './words/cooking';
 
 export const DEBUG = false;
 
@@ -28,7 +28,8 @@ interface VenueDefinition {
 }
 
 interface SceneProps {
-  transitionScene: (oldScene: SceneName, newScene: SceneName, transitionTime: number, venueDefinition?: VenueDefinition) => void;
+  transitionScene: (oldScene: SceneName, newScene: SceneName, transitionTime: number, venueDefinition?: VenueDefinition, win?: boolean) => void;
+  win?: boolean;
 }
 
 type VenueProps = SceneProps & VenueDefinition
@@ -48,10 +49,12 @@ export const App = () => {
 
   const [scenes, setScenes] = useState<SceneName[]>(["intro"])
   const [venueDefinition, setVenueDefinition] = useState<VenueDefinition>();
+  const [win, setWin] = useState<boolean>()
 
-  const newScene = useCallback((oldScene: SceneName, newScene: SceneName, transitionTime: number, venueDefinition?: VenueDefinition) => {
+  const newScene = useCallback((oldScene: SceneName, newScene: SceneName, transitionTime: number, venueDefinition?: VenueDefinition, win?: boolean) => {
     if (venueDefinition) setVenueDefinition(venueDefinition);
     setScenes(scenes => [...scenes, newScene])
+    setWin(win);
     window.setTimeout(() => {
       setScenes(scenes => scenes.filter(scene => scene !== oldScene))
     }, transitionTime);
@@ -66,15 +69,15 @@ export const App = () => {
         <hemisphericLight name='light1' intensity={0.7} direction={Vector3.Up()} />
         {scenes.map(scene => {
           const CurSceneComponent = scenesMap[scene] as VenueComponent;
-          let crosswordDimensions = { x: 8, y: 8 };
-          let iconRoot = "food" as WordListName;
-          let words = [...cookingWords] as WordList;
+          let crosswordDimensions = defaultNode.levelDefinition.crosswordDimensions;
+          let iconRoot = defaultNode.levelDefinition.iconRoot;
+          let words = defaultNode.levelDefinition.words;
           if (venueDefinition) {
             crosswordDimensions = venueDefinition.crosswordDimensions;
             iconRoot = venueDefinition.iconRoot;
             words = venueDefinition.words;
           }
-          return <CurSceneComponent key={scene} transitionScene={newScene} words={words} crosswordDimensions={crosswordDimensions} iconRoot={iconRoot} />
+          return <CurSceneComponent key={scene} transitionScene={newScene} words={words} crosswordDimensions={crosswordDimensions} iconRoot={iconRoot} win={win} />
         })}
       </Scene>
     </Engine>

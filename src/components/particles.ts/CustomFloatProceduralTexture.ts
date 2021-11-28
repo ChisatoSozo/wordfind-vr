@@ -1,4 +1,6 @@
-import { Color3, Color4, Logger, ProceduralTexture, Scene, Texture, Vector2, Vector3, WebRequest } from '@babylonjs/core';
+import { BaseTexture, Color3, Color4, Logger, ProceduralTexture, Scene, Texture, Vector2, Vector3, WebRequest } from '@babylonjs/core';
+import { Nullable } from '@babylonjs/core/types';
+import { _readTexturePixels } from './CustomFloatProceduralTextureReader';
 
 /**
  * Procedural texturing is a way to programmatically create a texture. There are 2 types of procedural textures: code-only, and code that references some classic 2D images, sometimes called 'refMaps' or 'sampler' images.
@@ -18,6 +20,51 @@ export const allSyncs: {
 } = {
     syncs: [],
 };
+
+export const readPixelsAsync = (
+    texture: BaseTexture,
+    faceIndex?: number | undefined,
+    level?: number | undefined,
+    buffer?: Nullable<ArrayBufferView> | undefined,
+): Promise<ArrayBufferView> | undefined => {
+    if (faceIndex === void 0) {
+        faceIndex = 0;
+    }
+    if (level === void 0) {
+        level = 0;
+    }
+    if (buffer === void 0) {
+        buffer = null;
+    }
+    if (!texture._texture) {
+        return undefined;
+    }
+    const size = texture.getSize();
+    let width = size.width;
+    let height = size.height;
+    //@ts-ignore
+    const engine = texture._getEngine();
+    if (!engine) {
+        return undefined;
+    }
+    if (level !== 0) {
+        width = width / Math.pow(2, level);
+        height = height / Math.pow(2, level);
+        width = Math.round(width);
+        height = Math.round(height);
+    }
+    try {
+        if (texture._texture.isCube) {
+
+            return _readTexturePixels(engine, texture._texture, width, height, faceIndex, level, buffer) as Promise<ArrayBufferView>;
+        }
+
+        return _readTexturePixels(engine, texture._texture, width, height, -1, level, buffer) as Promise<ArrayBufferView>;
+    } catch (e) {
+        console.warn(e);
+        return undefined;
+    }
+}
 
 export class CustomFloatProceduralTexture extends ProceduralTexture {
     private _animate = true;
@@ -106,6 +153,55 @@ export class CustomFloatProceduralTexture extends ProceduralTexture {
             xhr.send();
         } catch (ex) {
             Logger.Error('CustomFloatProceduralTexture: Error on XHR send request.');
+        }
+    }
+
+    public readPixels(): Nullable<ArrayBufferView> {
+        throw new Error('Not implemented');
+        return null;
+    }
+
+    //@ts-ignore
+    public readPixelsAsync(
+        faceIndex?: number | undefined,
+        level?: number | undefined,
+        buffer?: Nullable<ArrayBufferView> | undefined,
+    ): Promise<ArrayBufferView> | undefined {
+        if (faceIndex === void 0) {
+            faceIndex = 0;
+        }
+        if (level === void 0) {
+            level = 0;
+        }
+        if (buffer === void 0) {
+            buffer = null;
+        }
+        if (!this._texture) {
+            return undefined;
+        }
+        const size = this.getSize();
+        let width = size.width;
+        let height = size.height;
+        const engine = this._getEngine();
+        if (!engine) {
+            return undefined;
+        }
+        if (level !== 0) {
+            width = width / Math.pow(2, level);
+            height = height / Math.pow(2, level);
+            width = Math.round(width);
+            height = Math.round(height);
+        }
+        try {
+            if (this._texture.isCube) {
+                //@ts-ignore
+                return _readTexturePixels(engine, this._texture, width, height, faceIndex, level, buffer);
+            }
+            //@ts-ignore
+            return _readTexturePixels(engine, this._texture, width, height, -1, level, buffer);
+        } catch (e) {
+            console.warn(e);
+            return undefined;
         }
     }
 

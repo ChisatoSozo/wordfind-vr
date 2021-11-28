@@ -7,22 +7,29 @@ import { CustomParticleSystemEngine } from '../components/particles.ts/CustomPar
 import { _interacted } from '../hooks/useInteract';
 import { useParticleLocations } from '../hooks/useParticleLocations';
 import { introSound, playSound } from '../sounds/Sounds';
+import { defaultNode } from '../utils/generateLevelGraph';
+import { defaultLS, getLS } from '../utils/LS';
+import { completedNode } from './SceneMenu';
 
 export const SceneIntro: SceneComponent = ({ transitionScene }) => {
     const scene = useScene()
     const planeRef = useRef<Mesh>(null);
     const planeRef2 = useRef<Mesh>(null);
+    const planeRef3 = useRef<Mesh>(null);
     const [started, setStarted] = useState<boolean>(false)
+    const [skip, setSkip] = useState<boolean>(false)
     const wordParticleLocations = useParticleLocations(planeRef, 10000, 16, 2)
 
     useEffect(() => {
-        if (!planeRef.current || !planeRef2.current) return;
+        if (!planeRef.current || !planeRef2.current || !planeRef3.current) return;
         if (!scene) return;
         planeRef.current.isVisible = true;
         const material = (planeRef.current.material as StandardMaterial);
         const material2 = (planeRef2.current.material as StandardMaterial);
+        const material3 = (planeRef3.current.material as StandardMaterial);
         material.backFaceCulling = false;
         material2.backFaceCulling = false;
+        material3.backFaceCulling = false;
         const animation = new Animation('wordAlpha', 'alpha', 30, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
         animation.setKeys([
             {
@@ -38,9 +45,11 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
         animation.setEasingFunction(easingFunction);
         scene.beginDirectAnimation(material, [animation], 0, 180, false, 1,);
         window.setTimeout(() => {
-            if (!planeRef2.current) return;
+            if (!planeRef2.current || !planeRef3.current) return;
             planeRef2.current.isVisible = true;
+            planeRef3.current.isVisible = true;
             scene.beginDirectAnimation(material2, [animation], 0, 180, false, 2,);
+            scene.beginDirectAnimation(material3, [animation], 0, 180, false, 2,);
         }, 6000)
     }, [scene])
 
@@ -80,10 +89,11 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
     }, [scene, wordParticleLocations])
 
     useEffect(() => {
-        if (!started || !scene || !wordParticleLocations || !engineAndParticleSystem || !planeRef.current || !planeRef2.current) return;
+        if (!started || !scene || !wordParticleLocations || !engineAndParticleSystem || !planeRef.current || !planeRef2.current || !planeRef3.current) return;
 
         planeRef.current.isVisible = false;
         planeRef2.current.isVisible = false;
+        planeRef3.current.isVisible = false;
 
         const { engine, particleSystem } = engineAndParticleSystem;
         engine.init();
@@ -109,7 +119,14 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
         scene.beginDirectAnimation(particleSystem, [animation, animation2], 0, 180, false, 1,);
 
         window.setTimeout(() => {
-            transitionScene("intro", "menu", 10000)
+            if (JSON.stringify(getLS("unlockedLevels")) === JSON.stringify(defaultLS.unlockedLevels)) {
+                completedNode.current = defaultNode;
+                transitionScene("intro", "particles", 10000)
+            }
+            else {
+                transitionScene("intro", "menu", 10000)
+            }
+
             if (!particleSystem) return;
             particleSystem.stop();
 
@@ -132,6 +149,17 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
         playSound(introSound)
         _interacted.current = true;
     }, planeRef2)
+    useClick(() => {
+        _interacted.current = true;
+        if (JSON.stringify(getLS("unlockedLevels")) === JSON.stringify(defaultLS.unlockedLevels)) {
+            completedNode.current = defaultNode;
+            transitionScene("intro", "particles", 0)
+        }
+        else {
+            transitionScene("intro", "menu", 0)
+        }
+
+    }, planeRef3)
 
 
     return <> <plane isVisible={false} width={16} height={2} ref={planeRef} name={`intro plane`} position={new Vector3(0, 0, 10)}>
@@ -156,6 +184,18 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
                 samplingMode={Texture.TRILINEAR_SAMPLINGMODE}
             >
                 <textBlock name='cancel-text' text={"Start"} fontSize={128} fontStyle='bold' color={'white'} />
+            </advancedDynamicTexture>
+        </plane>
+        <plane isVisible={false} width={2} height={0.5} ref={planeRef3} name={`intro plane`} position={new Vector3(-5.5, -1.3, 10)}>
+            <advancedDynamicTexture
+                assignTo={'emissiveTexture'}
+                name='letterTexture'
+                height={128} width={512}
+                createForParentMesh
+                generateMipMaps={true}
+                samplingMode={Texture.TRILINEAR_SAMPLINGMODE}
+            >
+                <textBlock name='cancel-text' text={"Skip Intro"} fontSize={96} fontStyle='bold' color={'white'} />
             </advancedDynamicTexture>
         </plane>
     </>

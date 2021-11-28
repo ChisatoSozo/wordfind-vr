@@ -11,7 +11,7 @@ import { useSlideIn } from '../hooks/useSlideIn';
 import { useWordSearch } from '../hooks/useWordSearch';
 import { backgroundSound, playSound } from '../sounds/Sounds';
 
-export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _words, iconRoot }) => {
+export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _words, iconRoot, transitionScene }) => {
 
     const offset = useMemo(() => new Vector3(-0.5 * crosswordDimensions.x, 0, 1.5 * Math.max(crosswordDimensions.y, crosswordDimensions.x)), [crosswordDimensions.x, crosswordDimensions.y]);
     const startPosition = useMemo(() => new Vector3(0, 0, 10000).add(offset), [offset]);
@@ -30,10 +30,16 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
     const [highlightedIndicies, setHighlightedIndicies] = useState<{ x: number, y: number }[]>([]);
 
     useEffect(() => {
+        if (words.length === completedWords.length) {
+            transitionScene("particles", "menu", 0, undefined, true)
+        }
+    }, [completedWords.length, transitionScene, words.length])
+
+    useEffect(() => {
         if (!firstClicked && highlightedIndicies.length !== 0) {
             const word = highlightedIndicies.map(index => ws.grid[index.y][index.x]).join('');
 
-            if (words.includes(word.toLowerCase())) {
+            if (words.includes(word.toLowerCase()) && !completedWords.includes(word.toLowerCase())) {
                 setCompletedWords([...completedWords, word]);
                 setSolvedCoordinatePairs([...solvedCoordinatePairs, [highlightedIndicies[0], highlightedIndicies[highlightedIndicies.length - 1]]]);
             }
