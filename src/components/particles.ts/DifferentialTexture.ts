@@ -51,6 +51,14 @@ export class DifferentialTexture {
         this.textures.forEach(texture => texture.setTexture(name, textureIn));
     }
 
+    setVector3(name: string, vectorIn: Vector3) {
+        this.textures.forEach(texture => texture.setVector3(name, vectorIn));
+    }
+
+    readPixelsAsync = () => {
+        return this.textures[this.frame % 2].readPixelsAsync();
+    }
+
     update(deltaS: number, bindOtherUniforms?: (texture: CustomFloatProceduralTexture) => void) {
         if (
             this.textures.some((texture) => {

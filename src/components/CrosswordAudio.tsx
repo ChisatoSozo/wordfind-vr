@@ -40,7 +40,7 @@ const track: Stage[] = [
 export const CrosswordAudio: React.FC<CrosswordAudioProps> = ({ selectedLength, numWords, numCompletedWords }) => {
     const percentComplete = numCompletedWords / numWords;
 
-    const stageNum = Math.floor(percentComplete * track.length);
+    const stageNum = Math.min(Math.floor(percentComplete * track.length), track.length - 1);
 
     const stage = track[stageNum]
 

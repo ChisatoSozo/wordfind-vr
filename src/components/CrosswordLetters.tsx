@@ -1,6 +1,7 @@
 import { Vector3 } from '@babylonjs/core';
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { times } from 'lodash';
-import React, { Dispatch, SetStateAction, useCallback } from 'react';
+import React, { Dispatch, RefObject, SetStateAction, useCallback } from 'react';
 import { useScene } from 'react-babylonjs';
 import { CrosswordLetter } from './CrosswordLetter';
 import { makeClickParticles } from './particles.ts/clickParticles';
@@ -11,16 +12,16 @@ interface CrosswordLettersProps {
     highlightedIndicies: { x: number, y: number }[];
     setFirstClicked: Dispatch<SetStateAction<{ x: number, y: number } | null>>;
     setCurrentHover: Dispatch<SetStateAction<{ x: number, y: number } | null>>;
-    offset: Vector3;
+    parent: RefObject<TransformNode>
 }
 
-export const CrosswordLetters: React.FC<CrosswordLettersProps> = ({ crosswordDimensions, letterGrid, highlightedIndicies, setFirstClicked, setCurrentHover, offset }) => {
+export const CrosswordLetters: React.FC<CrosswordLettersProps> = ({ crosswordDimensions, letterGrid, highlightedIndicies, setFirstClicked, setCurrentHover, parent }) => {
 
     const scene = useScene();
 
     const addClickParticles = useCallback((locations: Vector3[]) => {
         if (highlightedIndicies.length === 0 || !scene) return;
-        makeClickParticles(scene, locations);
+        makeClickParticles(scene, locations, parent);
     }, [highlightedIndicies, scene])
 
     return <>{times(crosswordDimensions.x, (x) => {
@@ -35,7 +36,6 @@ export const CrosswordLetters: React.FC<CrosswordLettersProps> = ({ crosswordDim
                 setCurrentHover={setCurrentHover}
                 setFirstClicked={setFirstClicked}
                 addClickParticles={addClickParticles}
-                offset={offset}
             />
         })
     })}</>

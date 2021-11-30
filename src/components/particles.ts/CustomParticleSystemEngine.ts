@@ -1,4 +1,4 @@
-import { Mesh, MeshBuilder, Nullable, Observer, Scene, ShaderMaterial } from '@babylonjs/core';
+import { Mesh, MeshBuilder, Nullable, Observer, Scene, ShaderMaterial, TransformNode } from '@babylonjs/core';
 import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { flatten, times } from 'lodash';
 import { MAX_VALUES_PER_FRAME } from '../../utils/constants';
@@ -36,9 +36,11 @@ interface CustomParticleSystemEngineSettings {
     direction2: Vector3
     minVelocity: number
     maxVelocity: number
+    emitter: TransformNode
     gravity?: Vector3
     initialPositions?: Vector3[]
     targets?: Vector3[]
+    debug?: boolean
 }
 
 type EmissionType = 'sphere' | 'locations'
@@ -60,7 +62,6 @@ export class CustomParticleSystemEngine {
     public initialized = false;
 
     public emissionType: EmissionType = "sphere"
-    public emitter = new Vector3(0, 0, 0);
     public emitRadius = 1;
     public emitLocations: Vector3[] = [];
 
@@ -74,6 +75,7 @@ export class CustomParticleSystemEngine {
         direction2: new Vector3(-1, -1, 10),
         minVelocity: 0.1,
         maxVelocity: 0.3,
+        emitter: new TransformNode(""),
     }, private scene: Scene, fragmentShader = "particle") {
         const WIDTH = nextPowerOfTwo(Math.sqrt(settings.count));
 
@@ -91,6 +93,7 @@ export class CustomParticleSystemEngine {
         const targetsTexture = settings.targets && makeTextureFromVectors(settings.targets, scene, 0.)
 
         this.planes = MeshBuilder.CreatePlane('', { size: 1 });
+        this.planes.parent = settings.emitter;
 
         this.planes.thinInstanceSetBuffer('matrix', bufferMatricesPreCompute.slice(0, settings.count * 16), 16, true);
 
@@ -102,6 +105,7 @@ export class CustomParticleSystemEngine {
             texture.setTexture('positionSampler', initialPositionsTexture);
             texture.setTexture('velocitySampler', initialVelocitiesTexture);
             texture.setVector3('gravity', settings.gravity || new Vector3(0.00001, 0.00001, 0.00001));
+            texture.setVector3('offset', new Vector3(0.00001, 0.00001, 0.00001));
             targetsTexture && texture.setTexture('targetSampler', targetsTexture);
         }
 
@@ -148,6 +152,9 @@ export class CustomParticleSystemEngine {
 
         this.observable = this.scene.onBeforeRenderObservable.add((scene) => {
             const deltaS = scene.deltaTime / 1000;
+            if (this.settings.debug) {
+                this.positionTexture.readPixelsAsync()?.then(console.log)
+            }
             this.update(deltaS);
         });
     }
@@ -180,7 +187,7 @@ export class CustomParticleSystemEngine {
                     const vec = new Vector3(x, y, z);
                     vec.normalize();
                     const c = Math.cbrt(Math.random());
-                    return vec.scale(c * this.emitRadius).add(this.emitter);
+                    return vec.scale(c * this.emitRadius);
                 });
                 break;
             case 'locations':
@@ -203,6 +210,7 @@ export class CustomParticleSystemEngine {
     }
 
     update = (deltaS: number) => {
+        this.planes.parent = this.settings.emitter;
         const newPositionTexture = this.positionTexture.update(deltaS, (texture: CustomFloatProceduralTexture) => {
             if (this.active) {
                 texture.setFloat('setValues', 1)

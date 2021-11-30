@@ -3,6 +3,7 @@ import { Control } from '@babylonjs/gui/2D/controls/control';
 import React, { useEffect, useRef, useState } from 'react';
 import { useScene } from 'react-babylonjs';
 import { useParticleLocations } from '../hooks/useParticleLocations';
+import { PARTICLES_PER_ICON } from '../scenes/SceneMenu';
 import { CustomParticleSystemEngine } from './particles.ts/CustomParticleSystemEngine';
 
 interface CrosswordListWordProps {
@@ -11,10 +12,9 @@ interface CrosswordListWordProps {
     completed: boolean
     index: number
     iconRoot: string;
-    offset: Vector3;
 }
 
-export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, word, position, completed, index, offset }) => {
+export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, word, position, completed, index }) => {
     const wordRef = useRef<Mesh>(null);
     const iconRef = useRef<Mesh>(null);
 
@@ -22,11 +22,11 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, 
 
     const [iconReady, setIconReady] = useState(false);
 
-    const wordParticleLocations = useParticleLocations(wordRef, 1000, 4, 1, offset)
-    const wordParticleTargets = useParticleLocations(iconRef, 1000, 1, 1, offset, true, iconReady)
+    const wordParticleLocations = useParticleLocations(wordRef, PARTICLES_PER_ICON, 4, 1)
+    const wordParticleTargets = useParticleLocations(iconRef, PARTICLES_PER_ICON, 1, 1, true, iconReady, position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0)).subtract(position))
     const [engine, setEngine] = useState<CustomParticleSystemEngine>();
     useEffect(() => {
-        if (!scene || !wordParticleLocations || !wordParticleTargets || engine) return;
+        if (!scene || !wordParticleLocations || !wordParticleTargets || engine || !wordRef.current) return;
         const _engine = new CustomParticleSystemEngine({
             count: wordParticleLocations.length,
             minLifespan: -1,
@@ -39,6 +39,7 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, 
             maxVelocity: 10,
             initialPositions: wordParticleLocations,
             targets: wordParticleTargets,
+            emitter: wordRef.current
         }, scene)
         setEngine(_engine)
     }, [engine, scene, wordParticleLocations, wordParticleTargets])

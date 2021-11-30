@@ -1,4 +1,4 @@
-import { clamp } from "lodash";
+import { clamp, take } from "lodash";
 import { arabToRoman } from 'roman-numbers';
 import seedrandom from 'seedrandom';
 import { LevelDefinition, SceneName } from "../App";
@@ -30,7 +30,6 @@ const capitalizeFirstLetter = (string: string) => {
 
 const makeLevel = (scene: SceneName, wordListName: WordListName, levelNumber: number, rng: prng): LevelDefinition => {
     const difficulty = Math.log2(Math.max(levelNumber, 1)) * DIFFICULTY_RAMP + 1;
-    console.log(difficulty)
     const crosswordSize = 64 * difficulty;
 
     const isAssymetric = rng() < ASSYMETRY_CHANCE;
@@ -46,9 +45,7 @@ const makeLevel = (scene: SceneName, wordListName: WordListName, levelNumber: nu
     if (!isAssymetric) y = x
 
 
-    const levelName = capitalizeFirstLetter(wordListName) + " " + arabToRoman(levelNumber);
-
-    console.log(x, y)
+    const levelName = capitalizeFirstLetter(wordListName) + " " + arabToRoman(levelNumber + 1);
 
     return {
         scene,
@@ -61,6 +58,20 @@ const makeLevel = (scene: SceneName, wordListName: WordListName, levelNumber: nu
 
 const venues = ["particles"]
 
+export const defaultNode = {
+    levelDefinition: {
+        scene: "particles",
+        levelName: "Food I",
+        words: take(wordListMap["food"], 2) as any,
+        crosswordDimensions: { x: 8, y: 8 },
+        iconRoot: "food",
+    },
+    rank: 0,
+    icon: wordListMap["food"][0],
+    children: [],
+    parent: null
+} as LevelNode
+
 export const generateLevelGraph = (seed: string, maxWidth: number, depth: number) => {
     const rng = seedrandom(seed);
 
@@ -72,19 +83,9 @@ export const generateLevelGraph = (seed: string, maxWidth: number, depth: number
     };
 
     const nodes: LevelNode[][] = [];
-    const rootNode = {
-        levelDefinition: {
-            scene: "particles",
-            levelName: "Food I",
-            words: wordListMap["food"],
-            crosswordDimensions: { x: 8, y: 8 },
-            iconRoot: "food",
-        },
-        rank: 0,
-        icon: wordListMap["food"][0],
-        children: [],
-        parent: null
-    } as LevelNode
+
+    const rootNode = defaultNode;
+
     nodes[0] = [];
     nodes[0].push(rootNode);
 

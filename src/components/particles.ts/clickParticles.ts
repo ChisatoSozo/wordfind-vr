@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Scene, Vector3 } from '@babylonjs/core';
+import { Scene, TransformNode, Vector3 } from '@babylonjs/core';
 import { CustomParticleSystemEngine } from './CustomParticleSystemEngine';
 
 const clickParticles: {
@@ -10,7 +10,7 @@ const timer: {
     current?: number;
 } = {}
 
-export const makeClickParticles = (scene: Scene, locations: Vector3[]) => {
+export const makeClickParticles = (scene: Scene, locations: Vector3[], origin: TransformNode | RefObject<TransformNode> = new TransformNode("")) => {
     if (!clickParticles.current) {
 
         const engine = new CustomParticleSystemEngine({
@@ -22,12 +22,12 @@ export const makeClickParticles = (scene: Scene, locations: Vector3[]) => {
             direction1: new Vector3(1, 1, 1),
             direction2: new Vector3(-1, -1, 1),
             minVelocity: 0.5,
-            maxVelocity: 1
+            maxVelocity: 1,
+            emitter: origin.current || origin
         }, scene)
 
 
         // Where the particles come from
-        engine.emitter = new Vector3(0, 0, 0); // the starting object, the emitter
         engine.emitRadius = 0.5;
         engine.emissionType = "locations"
 
@@ -49,7 +49,7 @@ export const makeClickParticles = (scene: Scene, locations: Vector3[]) => {
     if (!clickParticles.current) return;
 
 
-
+    clickParticles.current.settings.emitter = origin.current || origin;
     clickParticles.current.emitLocations = locations;
 
     clickParticles.current.start();

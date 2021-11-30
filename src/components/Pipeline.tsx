@@ -1,6 +1,7 @@
 import { DefaultRenderingPipeline } from '@babylonjs/core';
 import { useEffect } from 'react';
 import { useScene } from 'react-babylonjs';
+import { useResolveFloatTextureReadPixels } from '../hooks/useResolveFloatTextureReadPixels';
 
 export const Pipeline = () => {
     const scene = useScene()
@@ -15,6 +16,8 @@ export const Pipeline = () => {
 
         pipeline.samples = 4;
     }, [scene])
+
+    useResolveFloatTextureReadPixels();
 
     return null;
 }
