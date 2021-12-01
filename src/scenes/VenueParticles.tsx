@@ -1,11 +1,13 @@
-import { Mesh, Vector3 } from '@babylonjs/core';
+import { Mesh, Texture, Vector3 } from '@babylonjs/core';
 import { times } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useHover } from 'react-babylonjs';
 import { VenueComponent } from '../App';
 import { Capsules } from '../components/Capsules';
 import { CrosswordAudio } from '../components/CrosswordAudio';
 import { CrosswordLetters } from '../components/CrosswordLetters';
 import { CrosswordList } from '../components/CrosswordList';
+import { useMouseUp } from '../forks/useMouse';
 import { useInteract } from '../hooks/useInteract';
 import { useSlideIn } from '../hooks/useSlideIn';
 import { useWordSearch } from '../hooks/useWordSearch';
@@ -81,7 +83,20 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
 
     }, [firstClicked, currentHover])
 
-    // useDrag(rootRef)
+    const planeRef2 = useRef<Mesh>(null);
+    const cancelPosition = useMemo(() => new Vector3(-(crosswordDimensions.x - 1) / 2, -crosswordDimensions.y / 2, -0.5), [crosswordDimensions.y]);
+
+    useMouseUp(() => {
+        console.log("click")
+        transitionScene("particles", "menu", 0, undefined, false)
+    }, planeRef2)
+
+    const [backColor, setBackColor] = useState<string>("white");
+    useHover(() => {
+        setBackColor("green")
+    }, () => {
+        setBackColor("white")
+    }, planeRef2)
 
     return <plane height={1000} width={100000} name='root' ref={rootRef} position={startPosition}>
         <standardMaterial name="background" alpha={0} />
@@ -89,5 +104,17 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
         <CrosswordAudio selectedLength={highlightedIndicies.length} numWords={words.length} numCompletedWords={completedWords.length} />
         <CrosswordLetters crosswordDimensions={crosswordDimensions} letterGrid={ws.grid} highlightedIndicies={highlightedIndicies} setFirstClicked={setFirstClicked} setCurrentHover={setCurrentHover} parent={rootRef} />
         <CrosswordList crosswordDimensions={crosswordDimensions} completedWords={completedWords} words={words} position={new Vector3((crosswordDimensions.x + 2.5) - crosswordDimensions.x / 2, crosswordDimensions.y / 2, 0)} iconRoot={iconRoot} />
+        <plane width={2} height={0.5} isPickable ref={planeRef2} name={`intro plane`} position={cancelPosition}>
+            <advancedDynamicTexture
+                assignTo={'emissiveTexture'}
+                name='letterTexture'
+                height={128} width={512}
+                createForParentMesh
+                generateMipMaps={true}
+                samplingMode={Texture.TRILINEAR_SAMPLINGMODE}
+            >
+                <textBlock name='cancel-text' text={"Give up"} fontSize={128} fontStyle='bold' color={backColor} />
+            </advancedDynamicTexture>
+        </plane>
     </plane>
 }

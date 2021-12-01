@@ -20,29 +20,31 @@ import { shapeWords } from "./shapes";
 import { sportWords } from "./sports";
 import { vehicleWords } from "./vehicles";
 
+const noUndefined = (words: any): string[] => words.filter((w: string[]) => w !== undefined);
+
 export const wordListMap = {
-    art: artWords,
-    autumn: autumnWords,
-    christmas: christmasWords,
-    clothing: clothingWords,
-    desserts: dessertWords,
-    devices: deviceWords,
-    dogs: dogWords,
-    farm: farmWords,
-    flowers: flowerWords,
-    food: cookingWords,
-    furniture: furnitureWords,
-    geography: geographyWords,
-    insects: insectWords,
-    instruments: instrumentWords,
-    ocean: oceanWords,
-    pirates: pirateWords,
-    plants: plantWords,
-    reptiles: reptileWords,
-    shapes: shapeWords,
-    sports: sportWords,
-    vehicles: vehicleWords,
+    art: noUndefined(artWords),
+    autumn: noUndefined(autumnWords),
+    christmas: noUndefined(christmasWords),
+    clothing: noUndefined(clothingWords),
+    desserts: noUndefined(dessertWords),
+    devices: noUndefined(deviceWords),
+    dogs: noUndefined(dogWords),
+    farm: noUndefined(farmWords),
+    flowers: noUndefined(flowerWords),
+    food: noUndefined(cookingWords),
+    furniture: noUndefined(furnitureWords),
+    geography: noUndefined(geographyWords),
+    insects: noUndefined(insectWords),
+    instruments: noUndefined(instrumentWords),
+    ocean: noUndefined(oceanWords),
+    pirates: noUndefined(pirateWords),
+    plants: noUndefined(plantWords),
+    reptiles: noUndefined(reptileWords),
+    shapes: noUndefined(shapeWords),
+    sports: noUndefined(sportWords),
+    vehicles: noUndefined(vehicleWords),
 } as const
 
 export type WordListName = keyof typeof wordListMap;
-export type WordList = (typeof wordListMap)[WordListName];
+export type WordList = string[];

@@ -17,8 +17,7 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
     const planeRef2 = useRef<Mesh>(null);
     const planeRef3 = useRef<Mesh>(null);
     const [started, setStarted] = useState<boolean>(false)
-    const [skip, setSkip] = useState<boolean>(false)
-    const wordParticleLocations = useParticleLocations(planeRef, 10000, 16, 2)
+    const wordParticleLocations = useParticleLocations(undefined, planeRef, 10000, 16, 2)
 
     useEffect(() => {
         if (!planeRef.current || !planeRef2.current || !planeRef3.current) return;

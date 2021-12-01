@@ -22,8 +22,8 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, 
 
     const [iconReady, setIconReady] = useState(false);
 
-    const wordParticleLocations = useParticleLocations(wordRef, PARTICLES_PER_ICON, 4, 1)
-    const wordParticleTargets = useParticleLocations(iconRef, PARTICLES_PER_ICON, 1, 1, true, iconReady, position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0)).subtract(position))
+    const wordParticleLocations = useParticleLocations({ word, text: true }, wordRef, PARTICLES_PER_ICON, 4, 1)
+    const wordParticleTargets = useParticleLocations({ word, text: false }, iconRef, PARTICLES_PER_ICON, 1, 1, true, iconReady, position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0)).subtract(position))
     const [engine, setEngine] = useState<CustomParticleSystemEngine>();
     useEffect(() => {
         if (!scene || !wordParticleLocations || !wordParticleTargets || engine || !wordRef.current) return;
@@ -67,7 +67,7 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, 
             <textBlock textHorizontalAlignment={Control.HORIZONTAL_ALIGNMENT_LEFT} name={word} text={word} fontSize={80} fontStyle='bold' color='white' />
         </advancedDynamicTexture>
     </plane>
-        <plane isVisible={false} ref={iconRef} width={1} height={1} name={`word${position.toString()}`} position={position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0))}>
+        <plane isVisible={false} ref={iconRef} width={1} height={1} name={word} position={position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0))}>
             <standardMaterial name='wordMaterial' disableLighting={true}>
                 <texture onLoad={() => setIconReady(true)} name='wordTexture' assignTo="emissiveTexture" url={`/icons/${iconRoot}/${word}.png`} />
             </standardMaterial>

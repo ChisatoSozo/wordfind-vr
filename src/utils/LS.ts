@@ -7,8 +7,10 @@ export const defaultLS: ILS = {
         "Food I": true
     }
 };
-//localStorage.getItem("LS_wordfind") || 
-const ls = JSON.stringify(defaultLS);
+
+const disableLS = false;
+
+const ls = (!disableLS && localStorage.getItem("LS_wordfind")) || JSON.stringify(defaultLS);
 console.log(ls)
 const LS: ILS = JSON.parse(ls);
 

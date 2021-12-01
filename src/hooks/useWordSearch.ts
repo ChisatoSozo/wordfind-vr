@@ -33,7 +33,6 @@ interface WS {
 
 export const useWordSearch = (crosswordDimensions: { x: number, y: number }, words: WordList): WS => {
     return useMemo(() => {
-
         const options = {
             cols: crosswordDimensions.x,
             rows: crosswordDimensions.y,

@@ -10,5 +10,5 @@ export const plantWords = [
     'leaf', 'spore', 'tree',
     'seed', 'moss', 'thorn',
     'vine', 'pollen', 'spine', 'stem', 'shrub',
-    'nectar',
+    'nectar'
 ] as const

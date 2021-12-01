@@ -1,7 +1,8 @@
 import { Color3, Mesh, Vector3 } from '@babylonjs/core'
 import { shuffle } from 'lodash'
 import React, { useEffect, useMemo, useRef } from 'react'
-import { useClick, useScene } from 'react-babylonjs'
+import { useScene } from 'react-babylonjs'
+import { useMouseUp } from '../forks/useMouse'
 import { useParticleLocations } from '../hooks/useParticleLocations'
 import { PARTICLES_PER_ICON } from '../scenes/SceneMenu'
 import { newLevelSound, playSound } from '../sounds/Sounds'
@@ -11,7 +12,7 @@ import { CustomParticleSystemEngine } from './particles.ts/CustomParticleSystemE
 interface LevelNodeProps {
     node: LevelNode
     position: Vector3
-    onClick: () => void
+    onClick: (node: LevelNode) => void
     newParticles: (particleLocations: Vector3[]) => void
     unlocked: boolean
     willBeUnlocked: boolean
@@ -24,15 +25,16 @@ export const LevelIcon: React.FC<LevelNodeProps> = ({ node, position, onClick, n
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const startedUnlocked = useMemo(() => unlocked, [])
 
-    useClick(
-        onClick,
-        planeRef
+    useMouseUp(
+        () => onClick(node),
+        planeRef,
+        !unlocked
     )
 
     const [textureReady, setTextureReady] = React.useState(false)
     const [engine, setEngine] = React.useState<CustomParticleSystemEngine>()
 
-    let particleLocations = useParticleLocations(planeRef, PARTICLES_PER_ICON, 1, 1, true, textureReady, startedUnlocked ? position : new Vector3(0, 0, 0))
+    let particleLocations = useParticleLocations({ word: node.icon, text: false }, planeRef, PARTICLES_PER_ICON, 1, 1, true, textureReady, startedUnlocked ? position : new Vector3(0, 0, 0))
     useEffect(() => {
         if (particleLocations && particleLocations.length > 0 && unlocked) {
             newParticles(particleLocations)
@@ -58,7 +60,7 @@ export const LevelIcon: React.FC<LevelNodeProps> = ({ node, position, onClick, n
             }, scene)
             setEngine(_engine)
         }
-    }, [unlocked, scene, particleLocations])
+    }, [unlocked, scene, particleLocations, willBeUnlocked])
     useEffect(() => {
         if (engine && unlocked && particleLocations && particleLocations.length > 0) {
             playSound(newLevelSound)

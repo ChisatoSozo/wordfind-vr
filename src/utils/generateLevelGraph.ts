@@ -77,9 +77,27 @@ export const generateLevelGraph = (seed: string, maxWidth: number, depth: number
 
     let curWidth = 1;
     let levelCounts: { [key in WordListName]: number } = {
-        food: 1,
+        art: 0,
+        autumn: 0,
+        christmas: 0,
+        clothing: 0,
+        desserts: 0,
+        devices: 0,
         dogs: 0,
-        plants: 0
+        farm: 0,
+        flowers: 0,
+        food: 1,
+        furniture: 0,
+        geography: 0,
+        insects: 0,
+        instruments: 0,
+        ocean: 0,
+        pirates: 0,
+        plants: 0,
+        reptiles: 0,
+        shapes: 0,
+        sports: 0,
+        vehicles: 0,
     };
 
     const nodes: LevelNode[][] = [];

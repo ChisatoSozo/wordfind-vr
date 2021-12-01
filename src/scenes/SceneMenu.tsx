@@ -17,7 +17,7 @@ const levelNodeRanks = generateLevelGraph(SEED, 4, 50);
 const getNodePosition = (node: LevelNode, nodeCount: number, index: number) => {
     const yOffset = ((nodeCount - 1) / 2) - index;
     const xOffset = node.rank - 2
-    return new Vector3(xOffset, yOffset, 0).scale(2);
+    return new Vector3(xOffset, yOffset, -0.5).scale(2);
 }
 
 export const PARTICLES_PER_ICON = 1000;
@@ -83,6 +83,12 @@ export const SceneMenu: SceneComponent = ({ transitionScene, win }) => {
         setParticleLocations(particleLocations => [...particleLocations, ...newParticleLocations]);
     }, [])
 
+    const levelClick = useCallback((node: LevelNode) => {
+        completedNode.current = node;
+        console.log(node)
+        transitionScene("menu", node.levelDefinition.scene, 0, node.levelDefinition)
+    }, [transitionScene])
+
     return <plane height={1000} width={100000} ref={rootRef} name={`intro transformNode`} position={new Vector3(0, 0, 10000)}>
         <standardMaterial name="background" alpha={0} />
         {
@@ -91,14 +97,10 @@ export const SceneMenu: SceneComponent = ({ transitionScene, win }) => {
                 return <Fragment key={index}>
                     {levelNodeRank.map((node, index) => {
                         const position = getNodePosition(node, nodeCount, index);
-                        const onClick = () => {
-                            completedNode.current = node;
-                            transitionScene("menu", node.levelDefinition.scene, 0, node.levelDefinition)
-                        }
 
                         const willBeUnlocked = toBeUnlocked.includes(node.levelDefinition.levelName)
                         const thisUnlocked = unlocked[node.levelDefinition.levelName]
-                        return <LevelIcon willBeUnlocked={willBeUnlocked} unlocked={thisUnlocked} key={index} position={position} node={node} onClick={onClick} newParticles={newParticles} />
+                        return <LevelIcon willBeUnlocked={willBeUnlocked} unlocked={thisUnlocked} key={index} position={position} node={node} onClick={levelClick} newParticles={newParticles} />
                     })}
                 </Fragment>
             })

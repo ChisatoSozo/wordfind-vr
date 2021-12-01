@@ -38,12 +38,12 @@ export function useMouseDown(onClick: MeshEventType, ownRef?: MutableRefObject<N
 }
 
 
-export function useMouseUp(onClick: MeshEventType, ownRef?: MutableRefObject<Nullable<Mesh>>): [MutableRefObject<Nullable<Mesh>>] {
+export function useMouseUp(onClick: MeshEventType, ownRef?: MutableRefObject<Nullable<Mesh>>, disable = false): [MutableRefObject<Nullable<Mesh>>] {
     const createdRef = useRef<Nullable<Mesh>>(null);
     const ref = ownRef ?? createdRef;
 
     useEffect(() => {
-        if (ref.current) {
+        if (ref.current && !disable) {
             if (ref.current instanceof AbstractMesh) {
                 const mesh = ref.current as Mesh;
 
@@ -67,8 +67,9 @@ export function useMouseUp(onClick: MeshEventType, ownRef?: MutableRefObject<Nul
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ref]);
+    }, [ref, disable]);
     // todo: if use ref.current as dep,  duplicate register action.
 
     return [ref];
 }
+

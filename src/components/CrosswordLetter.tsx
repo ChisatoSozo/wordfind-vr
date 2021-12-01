@@ -51,7 +51,7 @@ export const CrosswordLetter: React.FC<CrosswordLetterProps> = ({ letter, index,
         sphereRef
     )
 
-    const wordParticleLocations = useParticleLocations(planeRef, PARTICLES_PER_ICON, 1, 1, undefined, undefined, position)
+    const wordParticleLocations = useParticleLocations({ word: letter, text: true }, planeRef, PARTICLES_PER_ICON, 1, 1, undefined, undefined, position)
 
     useEffect(() => {
         if (!recentlyHighlighted || !wordParticleLocations) return;
