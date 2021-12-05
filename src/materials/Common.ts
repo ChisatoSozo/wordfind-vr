@@ -78,8 +78,8 @@ Effect.ShadersStore.particleVertexShader = glsl`
         float v = (float(y) + 0.5) / float(width);
         vec4 instPos = texture(positionSampler, vec2(u, v));
 
-        float maxLife = randomRange(float(instance), minLifespan, maxLifespan + 0.0001);
-        float size = randomRange(float(instance), minSize, maxSize + 0.0001);
+        float maxLife = randomRange(float(instance), minLifespan, maxLifespan + 0.000000000000000001);
+        float size = randomRange(float(instance), minSize, maxSize + 0.000000000000000001);
 
         vec4 outPosition = worldViewProjection * vec4(position * size + instPos.xyz, 1.0);
         gl_Position = outPosition;

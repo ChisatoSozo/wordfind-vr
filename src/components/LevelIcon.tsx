@@ -1,7 +1,8 @@
-import { Color3, Mesh, Vector3 } from '@babylonjs/core'
+import { Color3, Mesh, Texture, Vector3 } from '@babylonjs/core'
+import { Control } from '@babylonjs/gui/2D/controls/control'
 import { shuffle } from 'lodash'
 import React, { useEffect, useMemo, useRef } from 'react'
-import { useScene } from 'react-babylonjs'
+import { useHover, useScene } from 'react-babylonjs'
 import { useMouseUp } from '../forks/useMouse'
 import { useParticleLocations } from '../hooks/useParticleLocations'
 import { PARTICLES_PER_ICON } from '../scenes/SceneMenu'
@@ -11,19 +12,27 @@ import { CustomParticleSystemEngine } from './particles.ts/CustomParticleSystemE
 
 interface LevelNodeProps {
     node: LevelNode
-    position: Vector3
     onClick: (node: LevelNode) => void
     newParticles: (particleLocations: Vector3[]) => void
+    completed: boolean
     unlocked: boolean
     willBeUnlocked: boolean
 }
 
-export const LevelIcon: React.FC<LevelNodeProps> = ({ node, position, onClick, newParticles, unlocked, willBeUnlocked }) => {
+export const LevelIcon: React.FC<LevelNodeProps> = ({ node, onClick, newParticles, completed, unlocked, willBeUnlocked }) => {
     const planeRef = useRef<Mesh>(null)
     const scene = useScene()
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const startedUnlocked = useMemo(() => unlocked, [])
+
+    const [hovered, setHovered] = React.useState(false)
+
+    useHover(() => {
+        setHovered(true)
+    }, () => {
+        setHovered(false)
+    }, planeRef)
 
     useMouseUp(
         () => onClick(node),
@@ -34,13 +43,38 @@ export const LevelIcon: React.FC<LevelNodeProps> = ({ node, position, onClick, n
     const [textureReady, setTextureReady] = React.useState(false)
     const [engine, setEngine] = React.useState<CustomParticleSystemEngine>()
 
-    let particleLocations = useParticleLocations({ word: node.icon, text: false }, planeRef, PARTICLES_PER_ICON, 1, 1, true, textureReady, startedUnlocked ? position : new Vector3(0, 0, 0))
+    let particleLocations = useParticleLocations({ word: node.icon, text: false }, planeRef, PARTICLES_PER_ICON, 1, 1, true, textureReady, completed ? node.position : new Vector3(0, 0, 0))
     useEffect(() => {
+        if (!scene) return;
+        let _engine: CustomParticleSystemEngine;
         if (particleLocations && particleLocations.length > 0 && unlocked) {
-            newParticles(particleLocations)
+            if (completed)
+                newParticles(particleLocations)
+            else {
+                if (!planeRef.current) return;
+                const _engine = new CustomParticleSystemEngine({
+                    count: particleLocations.length,
+                    minLifespan: -1,
+                    maxLifespan: -1,
+                    minSize: 0.02,
+                    maxSize: 0.05,
+                    direction1: new Vector3(0.00000000000000000001, 0.00000000000000000001, 0.00000000000000000001),
+                    direction2: new Vector3(0.00000000000000000001, 0.00000000000000000001, 0.00000000000000000001),
+                    minVelocity: 0.000000000000000000001,
+                    maxVelocity: 0.000000000000000000001,
+                    initialPositions: particleLocations,
+                    emitter: planeRef.current
+                }, scene)
+                _engine.init()
+            }
+        }
+        return () => {
+            if (_engine) {
+                _engine.dispose()
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [newParticles, particleLocations])
+    }, [newParticles, particleLocations, scene])
 
     useEffect(() => {
         if (!unlocked && willBeUnlocked && particleLocations && particleLocations.length > 0 && planeRef.current && scene) {
@@ -68,9 +102,44 @@ export const LevelIcon: React.FC<LevelNodeProps> = ({ node, position, onClick, n
         }
     }, [unlocked, particleLocations, engine])
 
-    return <plane ref={planeRef} name={`level ${node.levelDefinition.levelName}`} position={position}>
-        <standardMaterial alpha={unlocked ? 0 : undefined} name='wordMaterial' disableLighting={true} emissiveColor={new Color3(0.2, 0.2, 0.2)}>
-            <texture uScale={0.99} vScale={0.99} onLoad={() => setTextureReady(true)} name='wordTexture' assignTo="opacityTexture" url={`/icons/${node.levelDefinition.iconRoot}/${node.icon}.png`} />
+    const linePoints = useMemo(() => {
+        if (node.children.length === 0) return;
+
+
+        return node.children.map(child => {
+            const start = node.position.clone().subtract(new Vector3(0, 0, -0.2));
+            const end = child.position.clone().subtract(new Vector3(0, 0, -0.2));
+            return [start, end]
+        }).flat()
+
+    }, [node.children, node.position])
+
+    const lineColor = useMemo(() => {
+        if (unlocked) {
+            return Color3.FromHexString('#FFFFFF')
+        }
+        return Color3.FromHexString('#000000')
+    }, [unlocked])
+
+    return <><plane ref={planeRef} name={`level ${node.levelDefinition.levelName}`} position={node.position}>
+        <standardMaterial diffuseColor={new Color3(0, 0, 0)} name='wordMaterial' disableLighting={true} emissiveColor={new Color3(0, 0, 0)}>
+            {!unlocked && <texture uScale={0.99} vScale={0.99} onLoad={() => setTextureReady(true)} name='wordTexture' assignTo="opacityTexture" url={`/icons/${node.levelDefinition.iconRoot}/${node.icon}.png`} />}
         </standardMaterial>
+        {hovered && unlocked &&
+            <plane isPickable={false} name='hover' width={4} height={2} position={new Vector3(1, -0.8, -0.1)}>
+                <advancedDynamicTexture
+                    name='dialogTexture'
+                    height={1024} width={2048}
+                    createForParentMesh
+                    generateMipMaps={true}
+                    samplingMode={Texture.TRILINEAR_SAMPLINGMODE}
+                >
+                    <textBlock textHorizontalAlignment={Control.HORIZONTAL_ALIGNMENT_LEFT} name={""} text={"Level: " + node.levelDefinition.levelName} fontSize={120} fontStyle='bold' color='white' />
+                    <textBlock textHorizontalAlignment={Control.HORIZONTAL_ALIGNMENT_LEFT} name={""} top={120} text={"Difficulty: " + Math.floor(Math.sqrt(node.levelDefinition.crosswordDimensions.x * node.levelDefinition.crosswordDimensions.y))} fontSize={120} fontStyle='bold' color='white' />
+                </advancedDynamicTexture>
+            </plane>
+        }
     </plane>
+        {linePoints && completed && <lines color={lineColor} name={`level ${node.levelDefinition.levelName}`} points={linePoints} />}
+    </>
 }

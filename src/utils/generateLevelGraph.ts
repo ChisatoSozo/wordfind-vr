@@ -1,4 +1,5 @@
-import { clamp, take } from "lodash";
+import { Vector3 } from "@babylonjs/core";
+import { clamp } from "lodash";
 import { arabToRoman } from 'roman-numbers';
 import seedrandom from 'seedrandom';
 import { LevelDefinition, SceneName } from "../App";
@@ -12,6 +13,11 @@ interface prng {
     state(): seedrandom.State;
 }
 
+export const getNodePosition = (rank: number, nodeCount: number, index: number) => {
+    const yOffset = (((nodeCount - 1) / 2) - index) + (Math.random() * 0.5);
+    const xOffset = (rank - 2) + (Math.random() * 0.5);
+    return new Vector3(xOffset, yOffset, -0.5).scale(2);
+}
 
 export interface LevelNode {
     levelDefinition: LevelDefinition
@@ -19,6 +25,7 @@ export interface LevelNode {
     rank: number;
     icon: string;
     parent: LevelNode | null;
+    position: Vector3;
 }
 
 const DIFFICULTY_RAMP = 1.1;
@@ -62,13 +69,14 @@ export const defaultNode = {
     levelDefinition: {
         scene: "particles",
         levelName: "Food I",
-        words: take(wordListMap["food"], 2) as any,
+        words: wordListMap["food"],
         crosswordDimensions: { x: 8, y: 8 },
         iconRoot: "food",
     },
     rank: 0,
     icon: wordListMap["food"][0],
     children: [],
+    position: getNodePosition(-1, 0, 0),
     parent: null
 } as LevelNode
 
@@ -119,11 +127,14 @@ export const generateLevelGraph = (seed: string, maxWidth: number, depth: number
             const possibleParents = nodes[i];
             const parent = possibleParents[Math.floor(rng() * possibleParents.length)];
 
+            const position = getNodePosition(i, curWidth, j);
+
             const node = {
                 levelDefinition: level,
                 rank: i + 1,
                 children: [],
-                parent: parent,
+                parent,
+                position,
                 icon: wordListMap[wordListName][levelCounts[wordListName] % wordListMap[wordListName].length],
             } as LevelNode;
 
@@ -131,6 +142,8 @@ export const generateLevelGraph = (seed: string, maxWidth: number, depth: number
             levelCounts[wordListName]++;
             newNodes.push(node);
         }
+
+
 
         nodes.push(newNodes);
     }

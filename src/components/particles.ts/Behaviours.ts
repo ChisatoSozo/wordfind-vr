@@ -4,6 +4,8 @@ import { MAX_VALUES_PER_FRAME } from "../../utils/constants";
 
 Effect.ShadersStore['linearBehaviourPositionPixelShader'] = glsl`
     uniform float delta;
+    uniform float minZ;
+    uniform float maxZ;
     uniform vec2 resolution;
     uniform sampler2D selfSampler;
     uniform sampler2D velocitySampler;
@@ -25,6 +27,10 @@ Effect.ShadersStore['linearBehaviourPositionPixelShader'] = glsl`
         if(setValues > 0.0 && id >= setValuesStart && id < setValuesStart + setValuesLength) {
             int startIndex = int(id - setValuesStart) * 3;
             outPosition = vec4(setValuesFloats[startIndex], setValuesFloats[startIndex + 1], setValuesFloats[startIndex + 2], 0.);
+        }
+
+        if(outPosition.z < minZ) {
+            outPosition.z += maxZ - minZ;
         }
         
         gl_FragColor = outPosition;
@@ -75,7 +81,7 @@ Effect.ShadersStore['targetBehaviourVelocityPixelShader'] = makeVelocityPixelSha
     vec3 direction = normalize(target - position.xyz);
     float dPosition = length(target - position.xyz);
 
-    float drag = clamp(1./(dPosition + 0.0001), .4, 10000.);
+    float drag = clamp(1./(dPosition + 0.000000000000000001), .4, 10000.);
 
     float multiplier = 1.0 - drag * delta;
     multiplier = clamp(multiplier, 0.0, 1.0);
@@ -83,7 +89,7 @@ Effect.ShadersStore['targetBehaviourVelocityPixelShader'] = makeVelocityPixelSha
 
     newVelocity = newVelocity + (direction * delta * 1.0);
 
-    vec4 outVelocity =  vec4(dPosition > 0.00001 ? newVelocity : vec3(0., 0., 0.), velocity.w);
+    vec4 outVelocity =  vec4(dPosition > 0.0000000000000000001 ? newVelocity : vec3(0., 0., 0.), velocity.w);
 `,
     glsl`
     uniform sampler2D targetSampler;

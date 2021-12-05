@@ -11,8 +11,10 @@ const timer: {
 } = {}
 
 export const makeClickParticles = (scene: Scene, locations: Vector3[], origin: TransformNode | RefObject<TransformNode> = new TransformNode("")) => {
-    if (!clickParticles.current) {
-
+    if (!clickParticles.current || clickParticles.current?.getIsDisposed()) {
+        if (clickParticles.current) {
+            clickParticles.current.dispose();
+        }
         const engine = new CustomParticleSystemEngine({
             count: 5000,
             minLifespan: 0.3,

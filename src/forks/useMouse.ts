@@ -72,4 +72,3 @@ export function useMouseUp(onClick: MeshEventType, ownRef?: MutableRefObject<Nul
 
     return [ref];
 }
-

@@ -55,6 +55,10 @@ export class DifferentialTexture {
         this.textures.forEach(texture => texture.setVector3(name, vectorIn));
     }
 
+    setFloat(name: string, value: number) {
+        this.textures.forEach(texture => texture.setFloat(name, value));
+    }
+
     readPixelsAsync = () => {
         return this.textures[this.frame % 2].readPixelsAsync();
     }

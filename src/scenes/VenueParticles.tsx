@@ -12,6 +12,8 @@ import { useInteract } from '../hooks/useInteract';
 import { useSlideIn } from '../hooks/useSlideIn';
 import { useWordSearch } from '../hooks/useWordSearch';
 import { backgroundSound, playSound } from '../sounds/Sounds';
+import { getLS, setLS } from '../utils/LS';
+import { completedNode } from './SceneMenu';
 
 export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _words, iconRoot, transitionScene }) => {
 
@@ -33,7 +35,11 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
 
     useEffect(() => {
         if (words.length === completedWords.length) {
-            transitionScene("particles", "menu", 0, undefined, true)
+            if (!completedNode.current) throw new Error("level not defined somehow")
+            setLS('completedLevels', { ...getLS('completedLevels'), [completedNode.current?.levelDefinition.levelName]: true });
+            window.setTimeout(() => {
+                transitionScene("particles", "menu", 0, undefined, true)
+            }, 2000);
         }
     }, [completedWords.length, transitionScene, words.length])
 
@@ -84,12 +90,15 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
     }, [firstClicked, currentHover])
 
     const planeRef2 = useRef<Mesh>(null);
-    const cancelPosition = useMemo(() => new Vector3(-(crosswordDimensions.x - 1) / 2, -crosswordDimensions.y / 2, -0.5), [crosswordDimensions.y]);
+    const cancelPosition = useMemo(() => new Vector3(-(crosswordDimensions.x - 1) / 2, -crosswordDimensions.y / 2, -0.5), [crosswordDimensions.x, crosswordDimensions.y]);
 
     useMouseUp(() => {
-        console.log("click")
         transitionScene("particles", "menu", 0, undefined, false)
     }, planeRef2)
+
+    useMouseUp(() => {
+        setFirstClicked(null);
+    }, rootRef)
 
     const [backColor, setBackColor] = useState<string>("white");
     useHover(() => {

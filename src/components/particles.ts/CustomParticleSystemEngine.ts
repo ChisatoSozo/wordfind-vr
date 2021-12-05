@@ -1,4 +1,4 @@
-import { Mesh, MeshBuilder, Nullable, Observer, Scene, ShaderMaterial, TransformNode } from '@babylonjs/core';
+import { Color3, Mesh, MeshBuilder, Nullable, Observer, Scene, ShaderMaterial, Texture, TransformNode } from '@babylonjs/core';
 import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { flatten, times } from 'lodash';
 import { MAX_VALUES_PER_FRAME } from '../../utils/constants';
@@ -40,7 +40,10 @@ interface CustomParticleSystemEngineSettings {
     gravity?: Vector3
     initialPositions?: Vector3[]
     targets?: Vector3[]
-    debug?: boolean
+    debug?: boolean,
+    minZ?: number,
+    maxZ?: number,
+    color?: Color3,
 }
 
 type EmissionType = 'sphere' | 'locations'
@@ -96,6 +99,9 @@ export class CustomParticleSystemEngine {
         this.planes.parent = settings.emitter;
 
         this.planes.thinInstanceSetBuffer('matrix', bufferMatricesPreCompute.slice(0, settings.count * 16), 16, true);
+        this.planes.renderingGroupId = 1;
+        this.planes.isPickable = false;
+        this.planes.alphaIndex = 0;
 
         const setInitialUniforms = (texture: CustomFloatProceduralTexture) => {
             texture.setFloat('setValues', 0)
@@ -104,8 +110,10 @@ export class CustomParticleSystemEngine {
             texture.setFloat('setValuesLength', 0)
             texture.setTexture('positionSampler', initialPositionsTexture);
             texture.setTexture('velocitySampler', initialVelocitiesTexture);
-            texture.setVector3('gravity', settings.gravity || new Vector3(0.00001, 0.00001, 0.00001));
-            texture.setVector3('offset', new Vector3(0.00001, 0.00001, 0.00001));
+            texture.setVector3('gravity', settings.gravity || new Vector3(0.0000000000000000001, 0.0000000000000000001, 0.0000000000000000001));
+            texture.setVector3('offset', new Vector3(0.0000000000000000001, 0.0000000000000000001, 0.0000000000000000001));
+            texture.setFloat('minZ', settings.minZ || -1000000);
+            texture.setFloat('maxZ', settings.maxZ || 1000000);
             targetsTexture && texture.setTexture('targetSampler', targetsTexture);
         }
 
@@ -137,6 +145,12 @@ export class CustomParticleSystemEngine {
         this.shaderMaterial.setFloat("maxLifespan", settings.maxLifespan);
         this.shaderMaterial.setFloat("minSize", settings.minSize);
         this.shaderMaterial.setFloat("maxSize", settings.maxSize);
+        this.shaderMaterial.setColor3('color', settings.color || new Color3(1, 1, 1));
+        this.shaderMaterial.alphaMode = 1;
+
+        const texture = new Texture("/textures/flare.png", scene);
+
+        this.shaderMaterial.setTexture("textureSampler", texture);
 
         this.planes.material = this.shaderMaterial;
         this.planes.alwaysSelectAsActiveMesh = true;
@@ -144,6 +158,11 @@ export class CustomParticleSystemEngine {
         this.currentIndex = 0;
 
         this.planes.isVisible = false;
+    }
+
+    setFloat(name: string, value: number) {
+        this.positionTexture.setFloat(name, value)
+        this.velocityTexture.setFloat(name, value)
     }
 
     init() {
@@ -157,6 +176,10 @@ export class CustomParticleSystemEngine {
             }
             this.update(deltaS);
         });
+    }
+
+    getIsDisposed() {
+        return this.planes.isDisposed()
     }
 
     dispose() {

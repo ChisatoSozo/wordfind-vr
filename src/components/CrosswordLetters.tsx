@@ -22,7 +22,7 @@ export const CrosswordLetters: React.FC<CrosswordLettersProps> = ({ crosswordDim
     const addClickParticles = useCallback((locations: Vector3[]) => {
         if (highlightedIndicies.length === 0 || !scene) return;
         makeClickParticles(scene, locations, parent);
-    }, [highlightedIndicies, scene])
+    }, [highlightedIndicies.length, parent, scene])
 
     return <>{times(crosswordDimensions.x, (x) => {
         return times(crosswordDimensions.y, (y) => {

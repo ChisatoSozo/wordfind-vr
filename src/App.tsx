@@ -66,6 +66,7 @@ export const App = () => {
       <Scene clearColor={new Color4(0, 0, 0, 1)}>
         <Pipeline />
         {DEBUG ? <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={-Math.PI / 2} beta={Math.PI / 2} radius={8} /> : <targetCamera name="camera1" position={new Vector3(0, 0, 0)} />}
+        <vrExperienceHelper webVROptions={{ createDeviceOrientationCamera: false }} enableInteractions />
         <hemisphericLight name='light1' intensity={0.7} direction={Vector3.Up()} />
         {scenes.map(scene => {
           const CurSceneComponent = scenesMap[scene] as VenueComponent;

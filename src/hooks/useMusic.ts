@@ -7,7 +7,6 @@ import { useInteract } from './useInteract';
 
 const barLoop = (instrument: Sampler, note: string) => {
     const bar1 = new Loop(time => {
-        console.log(time, Transport.bpm.value)
         instrument.triggerAttackRelease(note, '2m', time);
     }, '2m').start(0);
     const bar2 = new Loop(time => {
@@ -19,7 +18,6 @@ const barLoop = (instrument: Sampler, note: string) => {
 
 const bar4Loop = (instrument: Sampler, note: string) => {
     const bar1 = new Loop(time => {
-        console.log(time, Transport.bpm.value)
         instrument.triggerAttackRelease(note, '8m', time);
     }, '8m').start(0);
     const bar2 = new Loop(time => {

@@ -56,7 +56,7 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, 
         }
     }, [engine])
 
-    return <><plane isVisible={!completed} ref={wordRef} width={4} height={1} name={`word${position.toString()}`} position={position}>
+    return <><plane isPickable={false} isVisible={!completed} ref={wordRef} width={4} height={1} name={`word${position.toString()}`} position={position}>
         <advancedDynamicTexture
             name='dialogTexture'
             height={128} width={512}
@@ -67,7 +67,7 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, 
             <textBlock textHorizontalAlignment={Control.HORIZONTAL_ALIGNMENT_LEFT} name={word} text={word} fontSize={80} fontStyle='bold' color='white' />
         </advancedDynamicTexture>
     </plane>
-        <plane isVisible={false} ref={iconRef} width={1} height={1} name={word} position={position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0))}>
+        <plane isPickable={false} isVisible={false} ref={iconRef} width={1} height={1} name={word} position={position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0))}>
             <standardMaterial name='wordMaterial' disableLighting={true}>
                 <texture onLoad={() => setIconReady(true)} name='wordTexture' assignTo="emissiveTexture" url={`/icons/${iconRoot}/${word}.png`} />
             </standardMaterial>

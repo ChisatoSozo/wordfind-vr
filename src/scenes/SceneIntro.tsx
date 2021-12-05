@@ -1,5 +1,6 @@
-import { Animation, BoxParticleEmitter, GPUParticleSystem, Mesh, PowerEase, StandardMaterial, Vector3 } from '@babylonjs/core';
+import { Animation, Mesh, PowerEase, StandardMaterial, Vector3 } from '@babylonjs/core';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import { random, times } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useClick, useScene } from 'react-babylonjs';
 import { SceneComponent } from '../App';
@@ -69,22 +70,28 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
             emitter: planeRef.current
         }, scene)
 
-        const particleSystem = new GPUParticleSystem("particles", { capacity: 1000000 }, scene);
-        particleSystem.activeParticleCount = 1000000;
+        const washParticleCount = 1000000;
+        const initialPositions = times(washParticleCount, () => new Vector3(random(-50, 50, true), random(-50, 50, true), random(50, 150, true)))
 
-        particleSystem.emitRate = 100000;
-        particleSystem.particleEmitterType = new BoxParticleEmitter();
-        particleSystem.maxEmitBox = new Vector3(-40, 40, 80);
-        particleSystem.minEmitBox = new Vector3(40, -40, 0);
-        particleSystem.direction1 = new Vector3(0, 0, -10);
-        particleSystem.direction2 = new Vector3(0, 0, -10);
-        particleSystem.particleTexture = new Texture("/textures/flare.png", scene);
-        particleSystem.maxLifeTime = 10;
-        particleSystem.minSize = 0.01;
-        particleSystem.maxSize = 0.1;
-        particleSystem.emitter = new Vector3(-1000000, -1000000, -1000000);
-        particleSystem.start();
-        return { engine, particleSystem };
+        const engineWash = new CustomParticleSystemEngine({
+            count: washParticleCount,
+            minLifespan: -1,
+            maxLifespan: -1,
+            minSize: 0.02,
+            maxSize: 0.05,
+            direction1: new Vector3(0, 0, -10),
+            direction2: new Vector3(0, 0, -10),
+            minVelocity: 0.000000000000000001,
+            maxVelocity: 0.000000000000000001,
+            minZ: -50,
+            maxZ: 50,
+            gravity: new Vector3(0, 0, -2),
+            initialPositions: initialPositions,
+            emitter: planeRef.current
+        }, scene)
+
+
+        return { engine, engineWash };
     }, [scene, wordParticleLocations])
 
     useEffect(() => {
@@ -94,30 +101,12 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
         planeRef2.current.isVisible = false;
         planeRef3.current.isVisible = false;
 
-        const { engine, particleSystem } = engineAndParticleSystem;
+        const { engine, engineWash } = engineAndParticleSystem;
         engine.init();
-        particleSystem.emitter = new Vector3(0, 0, 10);
-
-        const animation = new Animation('', 'direction1', 30, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
-        const animation2 = new Animation('', 'direction2', 30, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
-        const keys = [
-            {
-                frame: 0,
-                value: new Vector3(0, 0, -10)
-            },
-            {
-                frame: 180,
-                value: new Vector3(0, 0, -100)
-            }
-        ]
-        animation.setKeys(keys);
-        animation2.setKeys(keys);
-        const easingFunction = new PowerEase(2);
-        animation.setEasingFunction(easingFunction);
-        animation2.setEasingFunction(easingFunction);
-        scene.beginDirectAnimation(particleSystem, [animation, animation2], 0, 180, false, 1,);
+        engineWash.init();
 
         window.setTimeout(() => {
+            engineWash.setFloat('minZ', -1000000);
             if (JSON.stringify(getLS("unlockedLevels")) === JSON.stringify(defaultLS.unlockedLevels)) {
                 completedNode.current = defaultNode;
                 transitionScene("intro", "particles", 10000)
@@ -125,21 +114,16 @@ export const SceneIntro: SceneComponent = ({ transitionScene }) => {
             else {
                 transitionScene("intro", "menu", 10000)
             }
-
-            if (!particleSystem) return;
-            particleSystem.stop();
-
         }, 10000)
 
     }, [engineAndParticleSystem, scene, started, transitionScene, wordParticleLocations])
 
     useEffect(() => {
         return () => {
-            console.log("dispose")
             if (!engineAndParticleSystem) return;
-            const { engine, particleSystem } = engineAndParticleSystem;
+            const { engine, engineWash } = engineAndParticleSystem;
             engine.dispose();
-            particleSystem.dispose();
+            engineWash.dispose();
         }
     }, [engineAndParticleSystem])
 
