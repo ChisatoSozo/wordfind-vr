@@ -1,6 +1,5 @@
-import React from 'react';
-import { Sampler } from 'tone';
-import { useAudioEffect } from '../hooks/useAudioEffect';
+import React, { useEffect } from 'react';
+import { Key, NoteName, useAudioEffect } from '../hooks/useAudioEffect';
 import { useMusic } from '../hooks/useMusic';
 
 interface CrosswordAudioProps {
@@ -9,42 +8,52 @@ interface CrosswordAudioProps {
     numCompletedWords: number,
 }
 
-export interface Instruments {
-    bassLoop: Sampler;
-    bassLoop2: Sampler;
-    bassMelody: Sampler;
+
+
+interface CrosswordAudioProps {
+    selectedLength: number,
+    numWords: number,
+    numCompletedWords: number,
 }
 
-export interface Stage {
-    instruments: (keyof Instruments)[];
+export interface Chord {
+    root: NoteName,
+    scale: Key,
 }
 
-const track: Stage[] = [
-    {
-        instruments: []
-    },
-    {
-        instruments: ["bassLoop"]
-    },
-    {
-        instruments: ["bassLoop", "bassLoop2"]
-    },
-    {
-        instruments: ["bassLoop", "bassMelody"]
-    },
-    {
-        instruments: ["bassLoop", "bassLoop2", "bassMelody"]
-    }
-]
+interface PhaseDefinition {
+    duration: number
+    melodyChord: Chord,
+    chord: Chord
+}
+
+export interface AudioDefinition {
+    bpm: number,
+    timeSignature: number,
+    volume: number,
+    pre: PhaseDefinition
+    post: PhaseDefinition
+    phases: PhaseDefinition[]
+}
 
 export const CrosswordAudio: React.FC<CrosswordAudioProps> = ({ selectedLength, numWords, numCompletedWords }) => {
     const percentComplete = numCompletedWords / numWords;
 
-    const stageNum = Math.min(Math.floor(percentComplete * track.length), track.length - 1);
 
-    const stage = track[stageNum]
+    const songName = 'awaken'
 
-    useMusic(stage)
-    useAudioEffect(selectedLength, numCompletedWords)
+    const [audioDef, setAudioDef] = React.useState<AudioDefinition>();
+    const phaseNum = audioDef ? Math.min(Math.floor(percentComplete * audioDef.phases.length), audioDef.phases.length - 1) : 0;
+    useEffect(() => {
+        fetch(`/music/${songName}/def.json`)
+            .then(res => res.json())
+            .then(setAudioDef)
+    }, [])
+
+    const [chord, setChord] = React.useState<Chord>();
+    const [melodyChord, setMelodyChord] = React.useState<Chord>();
+
+    useMusic(audioDef, songName, phaseNum, setChord, setMelodyChord);
+    useAudioEffect(selectedLength, numCompletedWords, chord || { root: 'A', scale: 'major' }, melodyChord || { root: 'A', scale: 'major' });
     return null;
 }

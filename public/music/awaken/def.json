@@ -1,0 +1,73 @@
+{
+    "bpm": 160,
+    "timeSignature": 4,
+    "volume": -20,
+    "pre": {
+        "duration": 5,
+        "melodyChord": {
+            "root": "A",
+            "scale": "minor"
+        },
+        "chord": {
+            "root": "A",
+            "scale": "minor"
+        }
+    },
+    "post": {
+        "duration": 6,
+        "melodyChord": {
+            "root": "A",
+            "scale": "minor"
+        },
+        "chord": {
+            "root": "A",
+            "scale": "minor"
+        }
+    },
+    "phases": [
+        {
+            "duration": 32,
+            "melodyChord": {
+                "root": "A",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "A",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 24,
+            "melodyChord": {
+                "root": "A",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "A",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 34,
+            "melodyChord": {
+                "root": "A",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "A",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 32,
+            "melodyChord": {
+                "root": "A",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "A",
+                "scale": "minor"
+            }
+        }
+    ]
+}

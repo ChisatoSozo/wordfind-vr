@@ -12,5 +12,14 @@ const playSound = (sound: HTMLAudioElement, volume = 0.3, loop = false) => {
     }
 }
 
+export const stopAllSounds = () => {
+    introSound.pause();
+    introSound.currentTime = 0
+    backgroundSound.pause();
+    backgroundSound.currentTime = 0
+    newLevelSound.pause();
+    newLevelSound.currentTime = 0
+}
+
 export { backgroundSound, introSound, newLevelSound, playSound };
 

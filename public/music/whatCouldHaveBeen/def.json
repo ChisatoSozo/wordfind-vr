@@ -1,0 +1,84 @@
+{
+    "bpm": 110,
+    "timeSignature": 3,
+    "volume": -30,
+    "pre": {
+        "duration": 7,
+        "melodyChord": {
+            "root": "F",
+            "scale": "minor"
+        },
+        "chord": {
+            "root": "F",
+            "scale": "minor"
+        }
+    },
+    "post": {
+        "duration": 4,
+        "melodyChord": {
+            "root": "F",
+            "scale": "minor"
+        },
+        "chord": {
+            "root": "F",
+            "scale": "minor"
+        }
+    },
+    "phases": [
+        {
+            "duration": 16,
+            "melodyChord": {
+                "root": "F",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "F",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 17,
+            "melodyChord": {
+                "root": "F",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "F",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 16,
+            "melodyChord": {
+                "root": "F",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "C#",
+                "scale": "major"
+            }
+        },
+        {
+            "duration": 38,
+            "melodyChord": {
+                "root": "F",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "F",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 32,
+            "melodyChord": {
+                "root": "F",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "C#",
+                "scale": "major"
+            }
+        }
+    ]
+}

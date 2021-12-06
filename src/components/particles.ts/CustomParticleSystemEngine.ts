@@ -57,6 +57,7 @@ export class CustomParticleSystemEngine {
     private velocityTexture: DifferentialTexture;
     private shaderMaterial: ShaderMaterial;
     private planes: Mesh;
+    private time = 0;
 
     private observable?: Nullable<Observer<Scene>>
 
@@ -146,7 +147,10 @@ export class CustomParticleSystemEngine {
         this.shaderMaterial.setFloat("minSize", settings.minSize);
         this.shaderMaterial.setFloat("maxSize", settings.maxSize);
         this.shaderMaterial.setColor3('color', settings.color || new Color3(1, 1, 1));
+        this.shaderMaterial.setFloat("time", 0.0001);
         this.shaderMaterial.alphaMode = 1;
+
+        this.time = 0;
 
         const texture = new Texture("/textures/flare.png", scene);
 
@@ -171,6 +175,8 @@ export class CustomParticleSystemEngine {
 
         this.observable = this.scene.onBeforeRenderObservable.add((scene) => {
             const deltaS = scene.deltaTime / 1000;
+            this.time += deltaS;
+            this.shaderMaterial.setFloat("time", this.time);
             if (this.settings.debug) {
                 this.positionTexture.readPixelsAsync()?.then(console.log)
             }

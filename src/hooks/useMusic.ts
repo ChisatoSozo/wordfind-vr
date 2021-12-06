@@ -1,96 +1,101 @@
-import { useEffect, useState } from 'react';
-import { loaded, Loop, Sampler, Synth, Transport } from 'tone';
-import { Instruments, Stage } from '../components/CrosswordAudio';
+import { useEffect, useRef, useState } from 'react';
+import { loaded, Loop, Sampler, Transport } from 'tone';
+import { AudioDefinition, Chord } from '../components/CrosswordAudio';
 import { useInteract } from './useInteract';
 
+const constructSynth = (song: string, index: number | string, volume: number) => {
+    const sampler = new Sampler({
+        urls: {
+            "C4": index + ".mp3",
+        },
+        baseUrl: `/music/${song}/`,
+    }).toDestination();
+    sampler.volume.value = -10;
 
-
-const barLoop = (instrument: Sampler, note: string) => {
-    const bar1 = new Loop(time => {
-        instrument.triggerAttackRelease(note, '2m', time);
-    }, '2m').start(0);
-    const bar2 = new Loop(time => {
-        instrument.triggerAttackRelease(note, '2m', time);
-    }, '2m').start('1m');
-
-    return [bar1, bar2]
+    return sampler;
 }
 
-const bar4Loop = (instrument: Sampler, note: string) => {
-    const bar1 = new Loop(time => {
-        instrument.triggerAttackRelease(note, '8m', time);
-    }, '8m').start(0);
-    const bar2 = new Loop(time => {
-        instrument.triggerAttackRelease(note, '8m', time);
-    }, '8m').start('4m');
-
-    return [bar1, bar2]
+interface Samplers {
+    pre?: Sampler;
+    post?: Sampler;
+    phases: Sampler[];
 }
 
-export const useMusic = (stage: Stage) => {
+export const useMusic = (audioDef: AudioDefinition | undefined, songName: string, phase: number, setChord: (chord: Chord) => void, setMelodyChord: (chord: Chord) => void) => {
 
-    const [synth, setSynth] = useState<Synth>();
-    const [instruments, setInstruemnts] = useState<Instruments>();
-
-    useInteract(() => {
-        //create a synth and connect it to the main output (your speakers)
-        const synth = new Synth().toDestination();
-
-        const bassLoop = new Sampler({
-            urls: {
-                "C2": "bass.mp3",
-            },
-            baseUrl: "/sounds/",
-        }).toDestination();
-
-        const bassLoop2 = new Sampler({
-            urls: {
-                "C3": "bass2.mp3",
-            },
-            baseUrl: "/sounds/",
-        }).toDestination();
-
-        const bassMelody = new Sampler({
-            urls: {
-                "C3": "bassMelody.mp3",
-            },
-            baseUrl: "/sounds/",
-        }).toDestination();
-
-        loaded().then(() => {
-            const instruments = {
-                bassLoop,
-                bassLoop2,
-                bassMelody
-            }
-
-            Transport.bpm.value = 86;
-            Transport.start();
-
-            Object.values(instruments).forEach(instrument => instrument.volume.value = -10);
-            setInstruemnts(instruments);
-        });
-
-
-        setSynth(synth);
-
-    })
+    const [samplers, setSamplers] = useState<Samplers>();
+    const playingPhase = useRef(-1);
+    const barsInPhase = useRef(0);
+    const currentPhase = useRef(phase)
+    useEffect(() => {
+        currentPhase.current = phase;
+    }, [phase])
 
     useEffect(() => {
-        if (!synth || !instruments) return;
-
-        const loops: Loop[] = []
-        if (stage.instruments.includes("bassLoop"))
-            loops.push(...barLoop(instruments.bassLoop, "C2"));
-
-        if (stage.instruments.includes("bassLoop2"))
-            loops.push(...barLoop(instruments.bassLoop2, "C3"));
-
-        if (stage.instruments.includes("bassMelody"))
-            loops.push(...bar4Loop(instruments.bassMelody, "C3"));
-
         return () => {
-            loops.forEach(loop => loop.stop());
+            if (samplers) {
+                samplers.pre?.dispose();
+                samplers.post?.dispose();
+                samplers.phases.forEach(s => s.dispose());
+            }
         }
-    }, [instruments, stage, synth])
+    }, [samplers])
+
+    useInteract(() => {
+        if (!audioDef) return;
+        //create a synth and connect it to the main output (your speakers)
+        let pre: Sampler | undefined;
+        let post: Sampler | undefined;
+        let phases: Sampler[] = [];
+
+        if (audioDef.pre) {
+            pre = constructSynth(songName, "pre", audioDef.volume);
+        }
+        if (audioDef.post) {
+            post = constructSynth(songName, "post", audioDef.volume);
+        }
+        for (let i = 0; i < audioDef.phases.length; i++) {
+            phases.push(constructSynth(songName, i, audioDef.volume));
+        }
+
+        console.log("test")
+
+        loaded().then(() => {
+            const samplers: Samplers = {
+                pre,
+                post,
+                phases
+            }
+
+            Transport.bpm.value = audioDef.bpm;
+            Transport.timeSignature = audioDef.timeSignature;
+            Transport.start();
+            if (pre) {
+                pre?.triggerAttackRelease("C4", audioDef.pre.duration + "m");
+                barsInPhase.current = audioDef.pre.duration;
+            }
+            let loop: Loop | undefined;
+            loop = new Loop(time => {
+                barsInPhase.current--;
+                if (barsInPhase.current <= 0) {
+                    if (currentPhase.current !== playingPhase.current) {
+                        if (currentPhase.current === audioDef.phases.length) {
+                            if (audioDef.post)
+                                samplers.phases[currentPhase.current].triggerAttackRelease("C4", audioDef.post.duration + 1 + "m", time);
+                            loop?.stop()
+                            return;
+                        }
+                        playingPhase.current = currentPhase.current;
+                    }
+                    barsInPhase.current += audioDef.phases[currentPhase.current].duration;
+                    samplers.phases[currentPhase.current].triggerAttackRelease("C4", audioDef.phases[currentPhase.current].duration + 1 + "m", time);
+                }
+                const phaseDef = audioDef.phases[playingPhase.current] || audioDef.phases[0]
+                setChord(phaseDef.chord)
+                setMelodyChord(phaseDef.melodyChord)
+            }, '1m').start(0);
+
+            setSamplers(samplers);
+        });
+    }, [audioDef])
 }

@@ -47,7 +47,7 @@ export type VenueComponent = React.FC<VenueProps>;
 export const App = () => {
   const windowSize = useWindowSize();
 
-  const [scenes, setScenes] = useState<SceneName[]>(["intro"])
+  const [scenes, setScenes] = useState<SceneName[]>(["particles"])
   const [venueDefinition, setVenueDefinition] = useState<VenueDefinition>();
   const [win, setWin] = useState<boolean>()
 

@@ -4,7 +4,7 @@ export const _interacted = {
     current: false
 };
 
-export const useInteract = <T>(callback: (() => T)) => {
+export const useInteract = <T>(callback: (() => T), dep: any = true) => {
     const [interacted, setInteracted] = useState(_interacted.current);
 
     useEffect(() => {
@@ -19,8 +19,8 @@ export const useInteract = <T>(callback: (() => T)) => {
     }, [])
 
     return useMemo(() => {
-        if (!interacted) return;
+        if (!interacted || !dep) return;
         return callback()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [interacted])
+    }, [interacted, !!dep])
 }

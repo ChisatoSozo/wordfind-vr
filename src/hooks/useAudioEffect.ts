@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
 import { useScene } from 'react-babylonjs';
 import { Sampler } from 'tone';
+import { Chord } from '../components/CrosswordAudio';
 import { useInteract } from './useInteract';
 
-type NoteName = 'A' | 'A#' | 'B' | 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#'
+export type NoteName = 'A' | 'A#' | 'B' | 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#'
 
 const noteNumber = {
     'A': 0,
@@ -33,7 +34,7 @@ interface Note {
 
 type NoteNumber = (typeof noteNumber)[NoteName];
 type Scale = (typeof noteNumber)[NoteName][];
-type Key = 'major' | 'minor' | 'phrygian dominant'
+export type Key = 'major' | 'minor' | 'phrygian dominant'
 
 const constructScale = (rootNote: Note, key: Key) => {
     const root = noteNumber[rootNote.note];
@@ -115,10 +116,10 @@ const getNextNote = (scale: Scale, currentNote: Note) => {
     throw new Error("check probability code")
 }
 
-export const useAudioEffect = (numLetters: number, numCompletedWords: number) => {
+export const useAudioEffect = (numLetters: number, numCompletedWords: number, chord: Chord, melodyChord: Chord) => {
     const scene = useScene();
-    const rootNote = useMemo(() => ({ note: 'C' as const, octave: 4 }), []);
-    const scale = useMemo(() => constructScale(rootNote, 'phrygian dominant'), [rootNote]);
+    const rootNote = useMemo(() => ({ note: melodyChord.root, octave: 4 }), [melodyChord]);
+    const scale = useMemo(() => constructScale(rootNote, melodyChord.scale), [rootNote, melodyChord]);
 
     const sound = useMemo(() => {
         if (!scene) return;
@@ -133,41 +134,38 @@ export const useAudioEffect = (numLetters: number, numCompletedWords: number) =>
     }, [scene])
 
     const success = useInteract(() => {
-        const sounds = [new Sampler({
+        const sound = new Sampler({
             urls: {
                 "C4": "success.mp3",
             },
             baseUrl: "/sounds/",
-        }).toDestination(), new Sampler({
-            urls: {
-                "C4": "success1.mp3",
-            },
-            baseUrl: "/sounds/",
-        }).toDestination()]
-        sounds.forEach(sound => sound.volume.value = -10)
-        return sounds
+        }).toDestination()
+        sound.volume.value = -5
+        return sound
     })
 
     const [currentNote, setCurrentNote] = React.useState<Note>(rootNote)
 
     useEffect(() => {
         if (success && numCompletedWords > 0) {
-            const _success = success[Math.floor(Math.random() * 2)];
+            const _success = success;
             if (_success.loaded) {
-                _success.triggerAttackRelease("C4", "4m")
+                _success.triggerAttackRelease(chord.root + "3", "4m")
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [numCompletedWords, success])
 
     useEffect(() => {
         if (!sound || numLetters === 0) return;
 
-        const nowNote = numLetters === 1 ? { note: 'C' as const, octave: Math.random() > 0.5 ? 4 : 5 } : currentNote;
+        const nowNote = numLetters === 1 ? { note: melodyChord.root, octave: Math.random() > 0.5 ? 4 : 5 } : currentNote;
 
         if (sound.loaded)
             sound.triggerAttackRelease(nowNote.note + nowNote.octave.toString(), "1m");
 
         const nextNote = getNextNote(scale, nowNote);
+        console.log(nextNote)
         setCurrentNote(nextNote);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [numLetters])

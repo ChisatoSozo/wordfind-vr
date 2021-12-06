@@ -8,10 +8,9 @@ import { CrosswordAudio } from '../components/CrosswordAudio';
 import { CrosswordLetters } from '../components/CrosswordLetters';
 import { CrosswordList } from '../components/CrosswordList';
 import { useMouseUp } from '../forks/useMouse';
-import { useInteract } from '../hooks/useInteract';
 import { useSlideIn } from '../hooks/useSlideIn';
 import { useWordSearch } from '../hooks/useWordSearch';
-import { backgroundSound, playSound } from '../sounds/Sounds';
+import { stopAllSounds } from '../sounds/Sounds';
 import { getLS, setLS } from '../utils/LS';
 import { completedNode } from './SceneMenu';
 
@@ -24,7 +23,9 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
 
     const ws = useWordSearch(crosswordDimensions, _words);
     const words = useMemo(() => ws.words.map(word => word.word), [ws]);
-    useInteract(() => playSound(backgroundSound, 0.3, true));
+    useEffect(() => {
+        stopAllSounds();
+    }, [])
 
     const [firstClicked, setFirstClicked] = useState<{ x: number, y: number } | null>(null);
     const [currentHover, setCurrentHover] = useState<{ x: number, y: number } | null>(null);

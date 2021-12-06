@@ -27,7 +27,7 @@ Effect.ShadersStore.particleVertexShader = glsl`
     // Varying
     varying vec2 vUV;
     varying vec4 vPosition;
-
+    varying float instance;
     varying float lifeLeft;
 
     void makeRotation(in vec3 direction, out mat3 rotation)
@@ -70,16 +70,17 @@ Effect.ShadersStore.particleVertexShader = glsl`
     }
 
     void main(void) {
-        int instance = gl_InstanceID;
+        int instance_i = gl_InstanceID;
+        instance = float(instance_i);
         int width = textureSize(positionSampler, 0).x;
-        int x = instance % width;
-        int y = instance / width;                            // integer division
+        int x = instance_i % width;
+        int y = instance_i / width;                            // integer division
         float u = (float(x) + 0.5) / float(width);           // map into 0-1 range
         float v = (float(y) + 0.5) / float(width);
         vec4 instPos = texture(positionSampler, vec2(u, v));
 
-        float maxLife = randomRange(float(instance), minLifespan, maxLifespan + 0.000000000000000001);
-        float size = randomRange(float(instance), minSize, maxSize + 0.000000000000000001);
+        float maxLife = randomRange(instance, minLifespan, maxLifespan + 0.000000000000000001);
+        float size = randomRange(instance, minSize, maxSize + 0.000000000000000001);
 
         vec4 outPosition = worldViewProjection * vec4(position * size + instPos.xyz, 1.0);
         gl_Position = outPosition;
