@@ -158,7 +158,6 @@ export class CustomFloatProceduralTexture extends ProceduralTexture {
 
     public readPixels(): Nullable<ArrayBufferView> {
         throw new Error('Not implemented');
-        return null;
     }
 
     //@ts-ignore

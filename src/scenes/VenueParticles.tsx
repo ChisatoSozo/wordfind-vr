@@ -22,7 +22,7 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
     useSlideIn(rootRef, new Vector3(0, 0, 0).add(offset))
 
     const ws = useWordSearch(crosswordDimensions, _words);
-    const words = useMemo(() => ws.words.map(word => word.word), [ws]);
+    const words = useMemo(() => [...new Set(ws.words.map(word => word.word))], [ws]);
     useEffect(() => {
         stopAllSounds();
     }, [])
@@ -48,7 +48,7 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
         if (!firstClicked && highlightedIndicies.length !== 0) {
             const word = highlightedIndicies.map(index => ws.grid[index.y][index.x]).join('');
 
-            if (words.includes(word.toLowerCase()) && !completedWords.includes(word.toLowerCase())) {
+            if (words.includes(word.toLowerCase()) && !completedWords.includes(word)) {
                 setCompletedWords([...completedWords, word]);
                 setSolvedCoordinatePairs([...solvedCoordinatePairs, [highlightedIndicies[0], highlightedIndicies[highlightedIndicies.length - 1]]]);
             }

@@ -3,7 +3,7 @@ import { Control } from '@babylonjs/gui/2D/controls/control'
 import { shuffle } from 'lodash'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { useHover, useScene } from 'react-babylonjs'
-import { useMouseUp } from '../forks/useMouse'
+import { useClick } from '../forks/useMouse'
 import { useParticleLocations } from '../hooks/useParticleLocations'
 import { PARTICLES_PER_ICON } from '../scenes/SceneMenu'
 import { newLevelSound, playSound } from '../sounds/Sounds'
@@ -23,9 +23,6 @@ export const LevelIcon: React.FC<LevelNodeProps> = ({ node, onClick, newParticle
     const planeRef = useRef<Mesh>(null)
     const scene = useScene()
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const startedUnlocked = useMemo(() => unlocked, [])
-
     const [hovered, setHovered] = React.useState(false)
 
     useHover(() => {
@@ -34,7 +31,7 @@ export const LevelIcon: React.FC<LevelNodeProps> = ({ node, onClick, newParticle
         setHovered(false)
     }, planeRef)
 
-    useMouseUp(
+    useClick(
         () => onClick(node),
         planeRef,
         !unlocked

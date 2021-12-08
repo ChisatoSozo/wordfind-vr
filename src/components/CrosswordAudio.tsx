@@ -42,7 +42,7 @@ export const CrosswordAudio: React.FC<CrosswordAudioProps> = ({ selectedLength, 
 
     const songName = 'awaken'
 
-    const [audioDef, setAudioDef] = React.useState<AudioDefinition>();
+    const [audioDef, setAudioDef] = React.useState<AudioDefinition | null>(null);
     const phaseNum = audioDef ? Math.min(Math.floor(percentComplete * audioDef.phases.length), audioDef.phases.length - 1) : 0;
     useEffect(() => {
         fetch(`/music/${songName}/def.json`)

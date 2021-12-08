@@ -1,6 +1,7 @@
 import { Color4, Vector3 } from '@babylonjs/core';
 import { useCallback, useState } from 'react';
 import { Engine, Scene } from 'react-babylonjs';
+import { Cache } from './components/Cache';
 import { Pipeline } from './components/Pipeline';
 import { useWindowSize } from './hooks/useWindowSize';
 import "./materials";
@@ -39,15 +40,13 @@ export interface LevelDefinition extends VenueDefinition {
   levelName: string;
 }
 
-
-
 export type SceneComponent = React.FC<SceneProps>;
 export type VenueComponent = React.FC<VenueProps>;
 
 export const App = () => {
   const windowSize = useWindowSize();
 
-  const [scenes, setScenes] = useState<SceneName[]>(["particles"])
+  const [scenes, setScenes] = useState<SceneName[]>(["menu"])
   const [venueDefinition, setVenueDefinition] = useState<VenueDefinition>();
   const [win, setWin] = useState<boolean>()
 
@@ -68,18 +67,22 @@ export const App = () => {
         {DEBUG ? <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={-Math.PI / 2} beta={Math.PI / 2} radius={8} /> : <targetCamera name="camera1" position={new Vector3(0, 0, 0)} />}
         <vrExperienceHelper webVROptions={{ createDeviceOrientationCamera: false }} enableInteractions />
         <hemisphericLight name='light1' intensity={0.7} direction={Vector3.Up()} />
-        {scenes.map(scene => {
-          const CurSceneComponent = scenesMap[scene] as VenueComponent;
-          let crosswordDimensions = defaultNode.levelDefinition.crosswordDimensions;
-          let iconRoot = defaultNode.levelDefinition.iconRoot;
-          let words = defaultNode.levelDefinition.words;
-          if (venueDefinition) {
-            crosswordDimensions = venueDefinition.crosswordDimensions;
-            iconRoot = venueDefinition.iconRoot;
-            words = venueDefinition.words;
-          }
-          return <CurSceneComponent key={scene} transitionScene={newScene} words={words} crosswordDimensions={crosswordDimensions} iconRoot={iconRoot} win={win} />
-        })}
+        <Cache>
+          {scenes.map(scene => {
+            const CurSceneComponent = scenesMap[scene] as VenueComponent;
+            let crosswordDimensions = defaultNode.levelDefinition.crosswordDimensions;
+            let iconRoot = defaultNode.levelDefinition.iconRoot;
+            let words = defaultNode.levelDefinition.words;
+            if (venueDefinition) {
+              crosswordDimensions = venueDefinition.crosswordDimensions;
+              iconRoot = venueDefinition.iconRoot;
+              words = venueDefinition.words;
+            }
+
+            return <CurSceneComponent key={scene} transitionScene={newScene} words={words} crosswordDimensions={crosswordDimensions} iconRoot={iconRoot} win={win} />
+
+          })}
+        </Cache>
       </Scene>
     </Engine>
   </div>

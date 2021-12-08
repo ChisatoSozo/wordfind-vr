@@ -1,4 +1,5 @@
 import { Color3, Mesh, Vector3 } from '@babylonjs/core'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { useScene } from 'react-babylonjs'
 import { SceneComponent } from '../App'
@@ -11,20 +12,22 @@ import { backgroundSound, playSound } from '../sounds/Sounds'
 import { generateLevelGraph, LevelNode } from '../utils/generateLevelGraph'
 import { getLS, setLS } from '../utils/LS'
 
-const SEED = 'seed';
-const levelNodeRanks = generateLevelGraph(SEED, 4, 50);
+
+const levelNodeRanks = generateLevelGraph(4, 50);
 const names = levelNodeRanks.map(n => n.map(n => n.levelDefinition.levelName)).flat();
 const nameMap: { [key: string]: boolean } = {};
 names.forEach(n => nameMap[n] = true);
-console.log(nameMap)
 
 export const PARTICLES_PER_ICON = 1000;
 export const completedNode: {
     current?: LevelNode
 } = {}
 
+const menuPosition = new Vector3(0, 0, 0);
+
 export const SceneMenu: SceneComponent = ({ transitionScene, win }) => {
     const rootRef = React.useRef<Mesh>(null)
+    const transformRef = React.useRef<TransformNode>(null)
     const scene = useScene();
 
     const [unlocked, setUnlocked] = useState(getLS("unlockedLevels"))
@@ -34,7 +37,7 @@ export const SceneMenu: SceneComponent = ({ transitionScene, win }) => {
     }, [unlocked])
 
     useInteract(() => playSound(backgroundSound, 0.3, true));
-    useSlideIn(rootRef, new Vector3(0, 0, 10))
+    useSlideIn(transformRef, new Vector3(0, 0, 10))
     useDrag(rootRef)
 
     const [particleLocations, setParticleLocations] = useState<Vector3[]>([]);
@@ -87,17 +90,28 @@ export const SceneMenu: SceneComponent = ({ transitionScene, win }) => {
         transitionScene("menu", node.levelDefinition.scene, 0, node.levelDefinition)
     }, [transitionScene])
 
-    return <plane height={1000} width={100000} ref={rootRef} name={`intro transformNode`} position={new Vector3(0, 0, 10000)}>
-        <standardMaterial name="background" alpha={0} />
-        {
-            levelNodeRanks.map((levelNodeRank, index) => <Fragment key={index}>
-                {levelNodeRank.map((node, index) => {
-                    const completed = getLS('completedLevels')[node.levelDefinition.levelName]
-                    const willBeUnlocked = toBeUnlocked.includes(node.levelDefinition.levelName)
-                    const thisUnlocked = unlocked[node.levelDefinition.levelName]
-                    return (willBeUnlocked || thisUnlocked) && <LevelIcon willBeUnlocked={willBeUnlocked} unlocked={thisUnlocked} key={index} node={node} onClick={levelClick} newParticles={newParticles} completed={completed} />
-                })}
-            </Fragment>)
+    useEffect(() => {
+        const plane = rootRef.current;
+        return () => {
+            if (!plane) return;
+            menuPosition.copyFrom(plane.position)
         }
-    </plane>
+    }, [])
+
+    return <transformNode ref={transformRef} name={`intro transformNode`} position={new Vector3(0, 0, 10000)}>
+        <plane height={1000} width={100000} ref={rootRef} name={`intro transformNode`} position={menuPosition}>
+            <standardMaterial name="background" alpha={0} />
+
+            {
+                levelNodeRanks.map((levelNodeRank, index) => <Fragment key={index}>
+                    {levelNodeRank.map((node, index) => {
+                        const completed = getLS('completedLevels')[node.levelDefinition.levelName]
+                        const willBeUnlocked = toBeUnlocked.includes(node.levelDefinition.levelName)
+                        const thisUnlocked = unlocked[node.levelDefinition.levelName]
+                        return (willBeUnlocked || thisUnlocked) && <LevelIcon willBeUnlocked={willBeUnlocked} unlocked={thisUnlocked} key={index} node={node} onClick={levelClick} newParticles={newParticles} completed={completed} />
+                    })}
+                </Fragment>)
+            }
+        </plane>
+    </transformNode>
 }

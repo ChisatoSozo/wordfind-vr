@@ -97,6 +97,7 @@ export const PickAll = () => {
                     wordsTexture.update();
 
                     await sleep(30);
+                    console.log(wordsTexture.getInternalTexture()?._workingCanvas)
 
                     const particles = await getParticles(texture, PARTICLES_PER_ICON, 1, 1, true, true, undefined);
                     if (!particles) throw new Error(`Could not get particles for ${word}`);

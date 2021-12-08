@@ -5,17 +5,12 @@ import seedrandom from 'seedrandom';
 import { LevelDefinition, SceneName } from "../App";
 import { wordListMap, WordListName } from "../words";
 
-interface prng {
-    (): number;
-    double(): number;
-    int32(): number;
-    quick(): number;
-    state(): seedrandom.State;
-}
+const SEED = 'seed';
+const rng = seedrandom(SEED);
 
 export const getNodePosition = (rank: number, nodeCount: number, index: number) => {
-    const yOffset = (((nodeCount - 1) / 2) - index) + (Math.random() * 0.5);
-    const xOffset = (rank - 2) + (Math.random() * 0.5);
+    const yOffset = (((nodeCount - 1) / 2) - index) + (rng() * 0.5);
+    const xOffset = (rank - 2) + (rng() * 0.5);
     return new Vector3(xOffset, yOffset, -0.5).scale(2);
 }
 
@@ -35,7 +30,7 @@ const capitalizeFirstLetter = (string: string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-const makeLevel = (scene: SceneName, wordListName: WordListName, levelNumber: number, rng: prng): LevelDefinition => {
+const makeLevel = (scene: SceneName, wordListName: WordListName, levelNumber: number): LevelDefinition => {
     const difficulty = Math.log2(Math.max(levelNumber, 1)) * DIFFICULTY_RAMP + 1;
     const crosswordSize = 64 * difficulty;
 
@@ -80,8 +75,8 @@ export const defaultNode = {
     parent: null
 } as LevelNode
 
-export const generateLevelGraph = (seed: string, maxWidth: number, depth: number) => {
-    const rng = seedrandom(seed);
+export const generateLevelGraph = (maxWidth: number, depth: number) => {
+
 
     let curWidth = 1;
     let levelCounts: { [key in WordListName]: number } = {
@@ -122,7 +117,7 @@ export const generateLevelGraph = (seed: string, maxWidth: number, depth: number
         for (let j = 0; j < curWidth; j++) {
             const scene = venues[Math.floor(rng() * venues.length)] as SceneName;
             const wordListName = Object.keys(wordListMap)[Math.floor(rng() * Object.keys(wordListMap).length)] as WordListName;
-            const level = makeLevel(scene, wordListName, levelCounts[wordListName], rng);
+            const level = makeLevel(scene, wordListName, levelCounts[wordListName]);
 
             const possibleParents = nodes[i];
             const parent = possibleParents[Math.floor(rng() * possibleParents.length)];

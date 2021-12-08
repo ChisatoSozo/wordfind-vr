@@ -21,7 +21,7 @@ interface Samplers {
     phases: Sampler[];
 }
 
-export const useMusic = (audioDef: AudioDefinition | undefined, songName: string, phase: number, setChord: (chord: Chord) => void, setMelodyChord: (chord: Chord) => void) => {
+export const useMusic = (audioDef: AudioDefinition | null, songName: string, phase: number, setChord: (chord: Chord) => void, setMelodyChord: (chord: Chord) => void) => {
 
     const [samplers, setSamplers] = useState<Samplers>();
     const playingPhase = useRef(-1);
@@ -41,6 +41,20 @@ export const useMusic = (audioDef: AudioDefinition | undefined, songName: string
         }
     }, [samplers])
 
+    const loop = useRef<Loop | undefined>();
+    const unmounted = useRef(false);
+
+    useEffect(() => {
+        return () => {
+            if (audioDef?.post)
+                samplers?.phases[currentPhase.current].triggerAttackRelease("C4", audioDef.post.duration + 1 + "m");
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            loop.current?.stop()
+            unmounted.current = true;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     useInteract(() => {
         if (!audioDef) return;
         //create a synth and connect it to the main output (your speakers)
@@ -58,9 +72,8 @@ export const useMusic = (audioDef: AudioDefinition | undefined, songName: string
             phases.push(constructSynth(songName, i, audioDef.volume));
         }
 
-        console.log("test")
-
         loaded().then(() => {
+            if (unmounted.current) return;
             const samplers: Samplers = {
                 pre,
                 post,
@@ -73,16 +86,15 @@ export const useMusic = (audioDef: AudioDefinition | undefined, songName: string
             if (pre) {
                 pre?.triggerAttackRelease("C4", audioDef.pre.duration + "m");
                 barsInPhase.current = audioDef.pre.duration;
-            }
-            let loop: Loop | undefined;
-            loop = new Loop(time => {
+            };
+            loop.current = new Loop(time => {
                 barsInPhase.current--;
                 if (barsInPhase.current <= 0) {
                     if (currentPhase.current !== playingPhase.current) {
                         if (currentPhase.current === audioDef.phases.length) {
                             if (audioDef.post)
                                 samplers.phases[currentPhase.current].triggerAttackRelease("C4", audioDef.post.duration + 1 + "m", time);
-                            loop?.stop()
+                            loop.current?.stop()
                             return;
                         }
                         playingPhase.current = currentPhase.current;
@@ -97,5 +109,5 @@ export const useMusic = (audioDef: AudioDefinition | undefined, songName: string
 
             setSamplers(samplers);
         });
-    }, [audioDef])
+    }, audioDef)
 }

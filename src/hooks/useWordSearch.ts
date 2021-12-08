@@ -36,10 +36,10 @@ export const useWordSearch = (crosswordDimensions: { x: number, y: number }, wor
         const options = {
             cols: crosswordDimensions.x,
             rows: crosswordDimensions.y,
-            disabledDirections: ["N", "W", "NW", "SW", "NE"],
+            disabledDirections: [],
             dictionary: shuffle([...words]),
             maxWords: 100,
-            backwardsProbability: 0,
+            backwardsProbability: 0.2,
             upperCase: true,
             diacritics: false
         };

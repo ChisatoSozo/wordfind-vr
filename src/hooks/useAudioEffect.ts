@@ -165,7 +165,6 @@ export const useAudioEffect = (numLetters: number, numCompletedWords: number, ch
             sound.triggerAttackRelease(nowNote.note + nowNote.octave.toString(), "1m");
 
         const nextNote = getNextNote(scale, nowNote);
-        console.log(nextNote)
         setCurrentNote(nextNote);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [numLetters])

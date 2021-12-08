@@ -1,9 +1,11 @@
-import { Mesh, Texture, Vector3 } from "@babylonjs/core";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Material, Mesh, Vector3 } from "@babylonjs/core";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useHover } from "react-babylonjs";
 import { useMouseDown, useMouseUp } from "../forks/useMouse";
 import { useParticleLocations } from "../hooks/useParticleLocations";
 import { PARTICLES_PER_ICON } from "../scenes/SceneMenu";
+import { CacheContext } from "./Cache";
 
 interface CrosswordLetterProps {
     letter: string;
@@ -59,16 +61,11 @@ export const CrosswordLetter: React.FC<CrosswordLetterProps> = ({ letter, index,
         addClickParticles(wordParticleLocations);
     }, [wordParticleLocations, recentlyHighlighted, addClickParticles]);
 
+    const letters = useContext(CacheContext)?.letters;
+    const texture = useMemo(() => letters?.[letter], [letter, letters]);
+
     return <><plane ref={planeRef} name={`plane${JSON.stringify(index)}`} position={position}>
-        <advancedDynamicTexture
-            name='letterTexture'
-            height={256} width={256}
-            createForParentMesh
-            generateMipMaps={true}
-            samplingMode={Texture.TRILINEAR_SAMPLINGMODE}
-        >
-            <textBlock name='cancel-text' text={letter} fontSize={256} fontStyle='bold' color={highlighted ? 'green' : hovered ? 'red' : 'white'} />
-        </advancedDynamicTexture>
+        <standardMaterial name='' alphaMode={Material.MATERIAL_ALPHABLEND} opacityTexture={texture} emissiveColor={highlighted ? Color3.Green() : hovered ? Color3.Red() : Color3.White()} disableLighting />
     </plane>
         <sphere ref={sphereRef} name={`sphere${JSON.stringify(index)}`} position={position}>
             <standardMaterial name="alpha" alpha={0} />

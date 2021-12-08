@@ -7,10 +7,6 @@ import "./Behaviours";
 import { CustomFloatProceduralTexture } from './CustomFloatProceduralTexture';
 import { DifferentialTexture } from './DifferentialTexture';
 
-interface CustomParticleSystemProps {
-    count: number;
-}
-
 const MAX_MESH_IN_INSTANCES = 1024 * 1024;
 
 const makeBuffer = () => {
