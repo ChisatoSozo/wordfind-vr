@@ -148,7 +148,7 @@ export class CustomParticleSystemEngine {
 
         this.time = 0;
 
-        const texture = new Texture("/textures/flare.png", scene);
+        const texture = new Texture(process.env.PUBLIC_URL + "/textures/flare.png", scene);
 
         this.shaderMaterial.setTexture("textureSampler", texture);
 

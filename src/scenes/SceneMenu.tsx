@@ -17,6 +17,7 @@ const levelNodeRanks = generateLevelGraph(4, 50);
 const names = levelNodeRanks.map(n => n.map(n => n.levelDefinition.levelName)).flat();
 const nameMap: { [key: string]: boolean } = {};
 names.forEach(n => nameMap[n] = true);
+console.log(names)
 
 export const PARTICLES_PER_ICON = 1000;
 export const completedNode: {

@@ -3,6 +3,7 @@ import { clamp } from "lodash";
 import { arabToRoman } from 'roman-numbers';
 import seedrandom from 'seedrandom';
 import { LevelDefinition, SceneName } from "../App";
+import { allSongs } from "../components/CrosswordAudio";
 import { wordListMap, WordListName } from "../words";
 
 const SEED = 'seed';
@@ -46,10 +47,12 @@ const makeLevel = (scene: SceneName, wordListName: WordListName, levelNumber: nu
     let y = Math.floor(crosswordSize / x);
     if (!isAssymetric) y = x
 
+    const song = allSongs[Math.floor(rng() * allSongs.length)];
 
     const levelName = capitalizeFirstLetter(wordListName) + " " + arabToRoman(levelNumber + 1);
 
     return {
+        song,
         scene,
         levelName,
         words: wordListMap[wordListName],
@@ -64,6 +67,7 @@ export const defaultNode = {
     levelDefinition: {
         scene: "particles",
         levelName: "Food I",
+        song: "silverLining",
         words: wordListMap["food"],
         crosswordDimensions: { x: 8, y: 8 },
         iconRoot: "food",

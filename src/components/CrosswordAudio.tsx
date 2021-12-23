@@ -6,6 +6,7 @@ interface CrosswordAudioProps {
     selectedLength: number,
     numWords: number,
     numCompletedWords: number,
+    song: string
 }
 
 
@@ -33,27 +34,27 @@ export interface AudioDefinition {
     volume: number,
     pre: PhaseDefinition
     post: PhaseDefinition
-    phases: PhaseDefinition[]
+    phases: PhaseDefinition[],
 }
 
-export const CrosswordAudio: React.FC<CrosswordAudioProps> = ({ selectedLength, numWords, numCompletedWords }) => {
+export const allSongs = ['silverLining', 'awaken', 'whatCouldHaveBeen', 'sheep']
+
+export const CrosswordAudio: React.FC<CrosswordAudioProps> = ({ song, selectedLength, numWords, numCompletedWords }) => {
     const percentComplete = numCompletedWords / numWords;
 
-
-    const songName = 'awaken'
 
     const [audioDef, setAudioDef] = React.useState<AudioDefinition | null>(null);
     const phaseNum = audioDef ? Math.min(Math.floor(percentComplete * audioDef.phases.length), audioDef.phases.length - 1) : 0;
     useEffect(() => {
-        fetch(`/music/${songName}/def.json`)
+        fetch(`${process.env.PUBLIC_URL}/music/${song}/def.json`)
             .then(res => res.json())
             .then(setAudioDef)
-    }, [])
+    }, [song])
 
     const [chord, setChord] = React.useState<Chord>();
     const [melodyChord, setMelodyChord] = React.useState<Chord>();
 
-    useMusic(audioDef, songName, phaseNum, setChord, setMelodyChord);
+    useMusic(audioDef, song, phaseNum, setChord, setMelodyChord);
     useAudioEffect(selectedLength, numCompletedWords, chord || { root: 'A', scale: 'major' }, melodyChord || { root: 'A', scale: 'major' });
     return null;
 }

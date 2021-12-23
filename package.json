@@ -2,6 +2,7 @@
   "name": "crossword-vr",
   "version": "0.1.0",
   "private": true,
+  "homepage": "wordfind",
   "dependencies": {
     "@babylonjs/core": "^4.2.0",
     "@babylonjs/gui": "^4.2.0",

@@ -3,7 +3,7 @@
     "timeSignature": 3,
     "volume": -30,
     "pre": {
-        "duration": 7,
+        "duration": 6,
         "melodyChord": {
             "root": "F",
             "scale": "minor"

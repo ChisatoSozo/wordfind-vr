@@ -1,6 +1,6 @@
 import { Color3, Mesh, Texture, Vector3 } from '@babylonjs/core'
 import { Control } from '@babylonjs/gui/2D/controls/control'
-import { shuffle } from 'lodash'
+import { shuffle, startCase } from 'lodash'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { useHover, useScene } from 'react-babylonjs'
 import { useClick } from '../forks/useMouse'
@@ -120,7 +120,7 @@ export const LevelIcon: React.FC<LevelNodeProps> = ({ node, onClick, newParticle
 
     return <><plane ref={planeRef} name={`level ${node.levelDefinition.levelName}`} position={node.position}>
         <standardMaterial diffuseColor={new Color3(0, 0, 0)} name='wordMaterial' disableLighting={true} emissiveColor={new Color3(0, 0, 0)}>
-            {!unlocked && <texture uScale={0.99} vScale={0.99} onLoad={() => setTextureReady(true)} name='wordTexture' assignTo="opacityTexture" url={`/icons/${node.levelDefinition.iconRoot}/${node.icon}.png`} />}
+            {!unlocked && <texture uScale={0.99} vScale={0.99} onLoad={() => setTextureReady(true)} name='wordTexture' assignTo="opacityTexture" url={`${process.env.PUBLIC_URL}/icons/${node.levelDefinition.iconRoot}/${node.icon}.png`} />}
         </standardMaterial>
         {hovered && unlocked &&
             <plane isPickable={false} name='hover' width={4} height={2} position={new Vector3(1, -0.8, -0.1)}>
@@ -133,6 +133,7 @@ export const LevelIcon: React.FC<LevelNodeProps> = ({ node, onClick, newParticle
                 >
                     <textBlock textHorizontalAlignment={Control.HORIZONTAL_ALIGNMENT_LEFT} name={""} text={"Level: " + node.levelDefinition.levelName} fontSize={120} fontStyle='bold' color='white' />
                     <textBlock textHorizontalAlignment={Control.HORIZONTAL_ALIGNMENT_LEFT} name={""} top={120} text={"Difficulty: " + Math.floor(Math.sqrt(node.levelDefinition.crosswordDimensions.x * node.levelDefinition.crosswordDimensions.y))} fontSize={120} fontStyle='bold' color='white' />
+                    <textBlock textHorizontalAlignment={Control.HORIZONTAL_ALIGNMENT_LEFT} name={""} top={240} text={"Song: " + startCase(node.levelDefinition.song)} fontSize={120} fontStyle='bold' color='white' />
                 </advancedDynamicTexture>
             </plane>
         }

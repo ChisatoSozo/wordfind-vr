@@ -69,7 +69,7 @@ export const CrosswordListWord: React.FC<CrosswordListWordProps> = ({ iconRoot, 
     </plane>
         <plane isPickable={false} isVisible={false} ref={iconRef} width={1} height={1} name={word} position={position.add(new Vector3(index % 2 === 0 ? -1.5 : -0.5, 0, 0))}>
             <standardMaterial name='wordMaterial' disableLighting={true}>
-                <texture onLoad={() => setIconReady(true)} name='wordTexture' assignTo="emissiveTexture" url={`/icons/${iconRoot}/${word}.png`} />
+                <texture onLoad={() => setIconReady(true)} name='wordTexture' assignTo="emissiveTexture" url={`${process.env.PUBLIC_URL}/icons/${iconRoot}/${word}.png`} />
             </standardMaterial>
         </plane>
     </>

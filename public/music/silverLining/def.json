@@ -1,0 +1,84 @@
+{
+    "bpm": 144,
+    "timeSignature": 4,
+    "volume": -20,
+    "pre": {
+        "duration": 9,
+        "melodyChord": {
+            "root": "D",
+            "scale": "minor"
+        },
+        "chord": {
+            "root": "D",
+            "scale": "minor"
+        }
+    },
+    "post": {
+        "duration": 9,
+        "melodyChord": {
+            "root": "D",
+            "scale": "minor"
+        },
+        "chord": {
+            "root": "D",
+            "scale": "minor"
+        }
+    },
+    "phases": [
+        {
+            "duration": 24,
+            "melodyChord": {
+                "root": "D",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "D",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 18,
+            "melodyChord": {
+                "root": "D",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "D",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 24,
+            "melodyChord": {
+                "root": "D",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "D",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 18,
+            "melodyChord": {
+                "root": "D",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "D",
+                "scale": "minor"
+            }
+        },
+        {
+            "duration": 16,
+            "melodyChord": {
+                "root": "D",
+                "scale": "minor"
+            },
+            "chord": {
+                "root": "D",
+                "scale": "minor"
+            }
+        }
+    ]
+}

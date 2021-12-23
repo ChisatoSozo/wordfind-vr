@@ -23,6 +23,7 @@ const scenesMap = {
 export type SceneName = keyof typeof scenesMap;
 
 interface VenueDefinition {
+  song: string;
   words: WordList;
   crosswordDimensions: { x: number, y: number };
   iconRoot: WordListName;
@@ -46,7 +47,7 @@ export type VenueComponent = React.FC<VenueProps>;
 export const App = () => {
   const windowSize = useWindowSize();
 
-  const [scenes, setScenes] = useState<SceneName[]>(["menu"])
+  const [scenes, setScenes] = useState<SceneName[]>(["intro"])
   const [venueDefinition, setVenueDefinition] = useState<VenueDefinition>();
   const [win, setWin] = useState<boolean>()
 
@@ -73,13 +74,15 @@ export const App = () => {
             let crosswordDimensions = defaultNode.levelDefinition.crosswordDimensions;
             let iconRoot = defaultNode.levelDefinition.iconRoot;
             let words = defaultNode.levelDefinition.words;
+            let song = defaultNode.levelDefinition.song;
             if (venueDefinition) {
               crosswordDimensions = venueDefinition.crosswordDimensions;
               iconRoot = venueDefinition.iconRoot;
               words = venueDefinition.words;
+              song = venueDefinition.song;
             }
 
-            return <CurSceneComponent key={scene} transitionScene={newScene} words={words} crosswordDimensions={crosswordDimensions} iconRoot={iconRoot} win={win} />
+            return <CurSceneComponent key={scene} song={song} transitionScene={newScene} words={words} crosswordDimensions={crosswordDimensions} iconRoot={iconRoot} win={win} />
 
           })}
         </Cache>

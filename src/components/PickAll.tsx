@@ -85,7 +85,7 @@ export const PickAll = () => {
                 //@ts-ignore
                 const wordList = wordListMap[category] as string[]
                 for (let word of wordList) {
-                    const texture = await asyncTexture(`/icons/${category}/${word}.png`, scene);
+                    const texture = await asyncTexture(`${process.env.PUBLIC_URL}/icons/${category}/${word}.png`, scene);
                     const wordsTexture = new AdvancedDynamicTexture(word + "text", 512, 128, scene, false);
                     const text = new TextBlock();
                     text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;

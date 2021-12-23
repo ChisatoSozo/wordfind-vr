@@ -8,7 +8,7 @@ const constructSynth = (song: string, index: number | string, volume: number) =>
         urls: {
             "C4": index + ".mp3",
         },
-        baseUrl: `/music/${song}/`,
+        baseUrl: `${process.env.PUBLIC_URL}/music/${song}/`,
     }).toDestination();
     sampler.volume.value = -10;
 

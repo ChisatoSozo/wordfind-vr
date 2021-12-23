@@ -127,7 +127,7 @@ export const useAudioEffect = (numLetters: number, numCompletedWords: number, ch
             urls: {
                 "G#5": "Vocal.wav",
             },
-            baseUrl: "/sounds/",
+            baseUrl: process.env.PUBLIC_URL + "/sounds/",
         }).toDestination()
         sound.volume.value = -10;
         return sound;
@@ -138,7 +138,7 @@ export const useAudioEffect = (numLetters: number, numCompletedWords: number, ch
             urls: {
                 "C4": "success.mp3",
             },
-            baseUrl: "/sounds/",
+            baseUrl: process.env.PUBLIC_URL + "/sounds/",
         }).toDestination()
         sound.volume.value = -5
         return sound

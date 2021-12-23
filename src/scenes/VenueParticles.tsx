@@ -14,7 +14,7 @@ import { stopAllSounds } from '../sounds/Sounds';
 import { getLS, setLS } from '../utils/LS';
 import { completedNode } from './SceneMenu';
 
-export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _words, iconRoot, transitionScene }) => {
+export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _words, iconRoot, transitionScene, song }) => {
 
     const offset = useMemo(() => new Vector3(-0.5 * crosswordDimensions.x, 0, 1.5 * Math.max(crosswordDimensions.y, crosswordDimensions.x)), [crosswordDimensions.x, crosswordDimensions.y]);
     const startPosition = useMemo(() => new Vector3(0, 0, 10000).add(offset), [offset]);
@@ -111,7 +111,7 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
     return <plane height={1000} width={100000} name='root' ref={rootRef} position={startPosition}>
         <standardMaterial name="background" alpha={0} />
         <Capsules solvedCoordinatePairs={solvedCoordinatePairs} crosswordDimensions={crosswordDimensions} />
-        <CrosswordAudio selectedLength={highlightedIndicies.length} numWords={words.length} numCompletedWords={completedWords.length} />
+        <CrosswordAudio song={song} selectedLength={highlightedIndicies.length} numWords={words.length} numCompletedWords={completedWords.length} />
         <CrosswordLetters crosswordDimensions={crosswordDimensions} letterGrid={ws.grid} highlightedIndicies={highlightedIndicies} setFirstClicked={setFirstClicked} setCurrentHover={setCurrentHover} parent={rootRef} />
         <CrosswordList crosswordDimensions={crosswordDimensions} completedWords={completedWords} words={words} position={new Vector3((crosswordDimensions.x + 2.5) - crosswordDimensions.x / 2, crosswordDimensions.y / 2, 0)} iconRoot={iconRoot} />
         <plane width={2} height={0.5} isPickable ref={planeRef2} name={`intro plane`} position={cancelPosition}>
