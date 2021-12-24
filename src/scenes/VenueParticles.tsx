@@ -24,7 +24,8 @@ export const VenueParticles: VenueComponent = ({ crosswordDimensions, words: _wo
     const ws = useWordSearch(crosswordDimensions, _words);
     const words = useMemo(() => [...new Set(ws.words.map(word => word.word))], [ws]);
     useEffect(() => {
-        stopAllSounds();
+        if (getLS("playMusic"))
+            stopAllSounds();
     }, [])
 
     const [firstClicked, setFirstClicked] = useState<{ x: number, y: number } | null>(null);

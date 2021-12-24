@@ -99,6 +99,9 @@ export const SceneMenu: SceneComponent = ({ transitionScene, win }) => {
         }
     }, [])
 
+    const [hoveredNode, setHoveredNode] = useState<string>();
+    const [playMusic, setPlayMusic] = useState<boolean>(getLS("playMusic"));
+
     return <transformNode ref={transformRef} name={`intro transformNode`} position={new Vector3(0, 0, 10000)}>
         <plane height={1000} width={100000} ref={rootRef} name={`intro transformNode`} position={menuPosition}>
             <standardMaterial name="background" alpha={0} />
@@ -109,7 +112,7 @@ export const SceneMenu: SceneComponent = ({ transitionScene, win }) => {
                         const completed = getLS('completedLevels')[node.levelDefinition.levelName]
                         const willBeUnlocked = toBeUnlocked.includes(node.levelDefinition.levelName)
                         const thisUnlocked = unlocked[node.levelDefinition.levelName]
-                        return (willBeUnlocked || thisUnlocked) && <LevelIcon willBeUnlocked={willBeUnlocked} unlocked={thisUnlocked} key={index} node={node} onClick={levelClick} newParticles={newParticles} completed={completed} />
+                        return (willBeUnlocked || thisUnlocked) && <LevelIcon playMusic={playMusic} setPlayMusic={setPlayMusic} hoveredNode={hoveredNode} setHoveredNode={setHoveredNode} willBeUnlocked={willBeUnlocked} unlocked={thisUnlocked} key={index} node={node} onClick={levelClick} newParticles={newParticles} completed={completed} />
                     })}
                 </Fragment>)
             }

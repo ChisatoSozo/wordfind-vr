@@ -67,7 +67,7 @@ export const defaultNode = {
     levelDefinition: {
         scene: "particles",
         levelName: "Food I",
-        song: "silverLining",
+        song: "sheep",
         words: wordListMap["food"],
         crosswordDimensions: { x: 8, y: 8 },
         iconRoot: "food",

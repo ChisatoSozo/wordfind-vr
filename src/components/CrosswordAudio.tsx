@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Key, NoteName, useAudioEffect } from '../hooks/useAudioEffect';
 import { useMusic } from '../hooks/useMusic';
+import { getLS } from '../utils/LS';
 
 interface CrosswordAudioProps {
     selectedLength: number,
@@ -46,6 +47,7 @@ export const CrosswordAudio: React.FC<CrosswordAudioProps> = ({ song, selectedLe
     const [audioDef, setAudioDef] = React.useState<AudioDefinition | null>(null);
     const phaseNum = audioDef ? Math.min(Math.floor(percentComplete * audioDef.phases.length), audioDef.phases.length - 1) : 0;
     useEffect(() => {
+        if (!getLS("playMusic")) return;
         fetch(`${process.env.PUBLIC_URL}/music/${song}/def.json`)
             .then(res => res.json())
             .then(setAudioDef)
@@ -55,6 +57,6 @@ export const CrosswordAudio: React.FC<CrosswordAudioProps> = ({ song, selectedLe
     const [melodyChord, setMelodyChord] = React.useState<Chord>();
 
     useMusic(audioDef, song, phaseNum, setChord, setMelodyChord);
-    useAudioEffect(selectedLength, numCompletedWords, chord || { root: 'A', scale: 'major' }, melodyChord || { root: 'A', scale: 'major' });
+    useAudioEffect(selectedLength, numCompletedWords, chord || { root: 'C', scale: 'phrygian dominant' }, melodyChord || { root: 'C', scale: 'phrygian dominant' });
     return null;
 }

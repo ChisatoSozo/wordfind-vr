@@ -150,7 +150,11 @@ export const useAudioEffect = (numLetters: number, numCompletedWords: number, ch
         if (success && numCompletedWords > 0) {
             const _success = success;
             if (_success.loaded) {
-                _success.triggerAttackRelease(chord.root + "3", "4m")
+                const firstSuccessNote = { octave: 3, note: chord.root } as Note
+                const secondSuccessNote = { octave: noteNumber[chord.root] < 3 ? 2 : 4, note: chord.root } as Note
+                const successOptions = [firstSuccessNote, secondSuccessNote];
+                const successNote = successOptions[Math.floor(Math.random() * successOptions.length)];
+                _success.triggerAttackRelease(successNote.note + successNote.octave, "4m")
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

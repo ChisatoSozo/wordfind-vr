@@ -1,6 +1,7 @@
 interface ILS {
     unlockedLevels: { [key: string]: boolean };
     completedLevels: { [key: string]: boolean };
+    playMusic: boolean
 }
 
 const everyLevel = {
@@ -175,6 +176,7 @@ const everyLevel = {
 const everyLS: ILS = {
     unlockedLevels: everyLevel,
     completedLevels: everyLevel,
+    playMusic: true
 }
 
 export const defaultLS: ILS = {
@@ -183,18 +185,19 @@ export const defaultLS: ILS = {
     },
     completedLevels: {
 
-    }
+    },
+    playMusic: true,
 };
 
 const disableLS = false;
-const doEveryLS = true;
+const doEveryLS = false;
 
 const ls = doEveryLS ? JSON.stringify(everyLS) : (!disableLS && localStorage.getItem("LS_wordfind")) || JSON.stringify(defaultLS);
 
 const LS: ILS = JSON.parse(ls);
 
-export const getLS = (key: keyof ILS) => LS[key];
-export const setLS = (key: keyof ILS, value: ILS[keyof ILS]) => {
+export const getLS = <T extends keyof ILS>(key: T) => LS[key] as ILS[T];
+export const setLS = <T extends keyof ILS>(key: T, value: ILS[T]) => {
     LS[key] = value;
     localStorage.setItem("LS_wordfind", JSON.stringify(LS));
 }
